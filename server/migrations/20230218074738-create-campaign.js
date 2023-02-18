@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('collections', {
+    await queryInterface.createTable('campaigns', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -10,19 +10,18 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       address: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(100),
+        comment: "월렛 주소"
       },
       title: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(150),
+        comment: "캠페인 이름"
       },
       description: {
-        type: Sequelize.STRING
+        type: Sequelize.TEXT,
       },
-      latitude: {
-        type: Sequelize.DOUBLE
-      },
-      longitude: {
-        type: Sequelize.DOUBLE
+      location: {
+        type: Sequelize.GEOMETRY('POINT')
       },
       distance: {
         type: Sequelize.DOUBLE
@@ -44,10 +43,11 @@ module.exports = {
       updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW,
       }
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('collections');
+    await queryInterface.dropTable('campaigns');
   }
 };

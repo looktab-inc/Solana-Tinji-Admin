@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class CollectionModel extends Model {
+  class Market extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -13,23 +13,27 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  CollectionModel.init({
-    title: DataTypes.STRING,
+  Market.init({
     address: DataTypes.STRING,
     description: DataTypes.STRING,
-    latitude: DataTypes.DOUBLE,
-    longitude: DataTypes.DOUBLE,
-    distance: DataTypes.DOUBLE,
-    display_started_at: DataTypes.DATE,
-    display_ended_at: DataTypes.DATE,
+    location_address: DataTypes.STRING,
+    open_time: {
+      type: DataTypes.JSON,
+      get() {
+        return JSON.parse(this.getDataValue("open_time"));
+      },
+      set(value) {
+        return this.setDataValue("open_time", JSON.stringify(value));
+      }
+    }
   }, {
     sequelize,
-    tableName: 'collections',
-    modelName: 'CollectionModel',
+    tableName: 'markets',
+    modelName: 'market',
     timestamps: true,
     underscored: true,
     charset: 'utf8',
     collate: 'utf8_general_ci',
   });
-  return CollectionModel;
+  return Market;
 };

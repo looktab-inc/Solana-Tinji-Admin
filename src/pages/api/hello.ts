@@ -12,8 +12,8 @@ const handler =
   nextConnect()
     .get(
       async ( req: NextApiRequest, res: NextApiResponse<Data>) => {
-              // TODO 이렇게 하면 됩니당
-        const collections = await db.CollectionModel.findAll()
+        // 디비에서 정보 가져오기
+        const campaigns = await db.campaign.findAll()
         let connection = new web3.Connection(web3.clusterApiUrl("testnet"), "confirmed");
 
         let slot = await connection.getSlot();
@@ -21,7 +21,7 @@ const handler =
         let block = await connection.getBlock(slot);
         console.log(block)
 
-        res.status(200).json({ name: collections });
+        res.status(200).json({ name: campaigns });
       })
 
 export default handler
