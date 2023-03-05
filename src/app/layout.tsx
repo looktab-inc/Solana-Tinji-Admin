@@ -17,7 +17,7 @@ export default function RootLayout({
         <meta name="description" content="tinji product" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <body>
+      <body className="font-Montserrat h-[100vh] w-full">
         <AppProvider>
           {children}
         </AppProvider>

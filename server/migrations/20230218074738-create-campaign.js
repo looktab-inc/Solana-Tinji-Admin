@@ -9,7 +9,7 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      address: {
+      store_address: {
         type: Sequelize.STRING(100),
         comment: "월렛 주소"
       },
@@ -25,9 +25,6 @@ module.exports = {
       },
       distance: {
         type: Sequelize.DOUBLE
-      },
-      image: {
-        type: Sequelize.STRING,
       },
       display_started_at: {
         type: Sequelize.DATE,

@@ -1,5 +1,7 @@
 import React, { createContext, useEffect, useState } from "react";
 import {useRouter} from "next/navigation";
+import axios from "axios";
+import Cookies from 'js-cookie'
 
 export const AppContext = createContext({} as any);
 
@@ -11,11 +13,57 @@ type Account = {
   address: string;
 }
 
+const defaultStandardNFTInfo = {
+  discountType: 'amount',
+  discountAmount: 0,
+  discountRate: 0,
+  imageUrl: '',
+  imageName:' Upload NFT img'
+}
+
+const defaultDynamicNFTInfo = {
+  discountType: 'amount',
+  discountAmount: 0,
+  discountRate: 0,
+  imageUrl: '',
+  imageName:' Upload NFT img',
+  days: 0,
+}
+
+
 export const AppProvider = (props: AppProps) => {
+  const router = useRouter();
   const [account, setAccount] = useState<Account>(null);
   const [error, setError] = useState<any>("");
   const [provider, setProvider] = useState<any>(null)
-  const router = useRouter();
+  const [standardNFT, setStandardNFT] = useState<any>(defaultStandardNFTInfo)
+  const [dynamicNFT, setDynamicNFT] = useState<any>([defaultDynamicNFTInfo, defaultDynamicNFTInfo])
+
+
+  const changeStandardNFT = (key, value) => {
+    console.log(value)
+    setStandardNFT({
+      ...standardNFT,
+      [`${key}`]: value
+    })
+    console.log(standardNFT)
+  }
+
+  const changeDynamicNFT = (index, key, value) => {
+    console.log(index, key, value)
+    let newArr = [...dynamicNFT];
+    newArr[index][`${key}`] = value
+    setDynamicNFT(newArr)
+    console.log(dynamicNFT)
+  }
+
+  const resetStandardNFT = () => {
+    setStandardNFT(defaultStandardNFTInfo)
+  }
+
+  const resetDynamicNFT = () => {
+    setDynamicNFT([defaultDynamicNFTInfo, defaultDynamicNFTInfo])
+  }
 
   const connectWallet = async () => {
     try {
@@ -24,18 +72,25 @@ export const AppProvider = (props: AppProps) => {
         setAccount({
           address: resp.publicKey.toString()
         })
+        return resp.publicKey.toString()
       } else {
-        window.open('https://phantom.app/', '_blank');
+        throw "needToInstallWalletExtension"
       }
-
     } catch (error) {
-      setError(error.message);
+      if (error === "needToInstallWalletExtension") {
+        window.open('https://phantom.app/', '_blank');
+      } else {
+        setError(error.message);
+      }
+      throw error
     }
   }
 
   const disconnectWallet = async () => {
-    console.log('disconnect')
-    await provider.disconnect()
+    await axios.put('/api/disconnect').then( async _ => {
+      await provider.disconnect()
+      router.push('/')
+    })
   }
 
   const checkLogin = () => {
@@ -44,8 +99,15 @@ export const AppProvider = (props: AppProps) => {
 
   useEffect(() => {
     const location = window.location.pathname
-    if (!checkLogin() && location !== '/') {
-      router.push('/')
+    const address = Cookies.get('address')
+    if (address) {
+      setAccount({
+        address: address
+      })
+    } else {
+      if (!checkLogin() && location !== '/') {
+        router.push('/')
+      }
     }
 
     if ('phantom' in window) {
@@ -58,7 +120,18 @@ export const AppProvider = (props: AppProps) => {
 
   return (
     <AppContext.Provider
-      value={{ account, connectWallet, disconnectWallet, error }}
+      value={{
+        account,
+        connectWallet,
+        disconnectWallet,
+        error,
+        standardNFT,
+        changeStandardNFT,
+        resetStandardNFT,
+        dynamicNFT,
+        changeDynamicNFT,
+        resetDynamicNFT
+    }}
     >
       {props.children}
     </AppContext.Provider>

@@ -2,26 +2,18 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('markets', {
+    await queryInterface.createTable('store_images', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      address: {
-        type: Sequelize.STRING,
-        comment: 'wallet 주소'
+      store_id: {
+        type: Sequelize.INTEGER
       },
-      description: {
-        type: Sequelize.TEXT
-      },
-      location_address: {
+      image_url: {
         type: Sequelize.STRING
-      },
-      open_time: {
-        type: Sequelize.JSON,
-        comment: '오픈 시간'
       },
       created_at: {
         allowNull: false,
@@ -36,6 +28,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('markets');
+    await queryInterface.dropTable('store_images');
   }
 };

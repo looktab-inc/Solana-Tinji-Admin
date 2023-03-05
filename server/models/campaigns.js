@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class MarketImages extends Model {
+  class Campaign extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -13,17 +13,22 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  MarketImages.init({
-    market_id: DataTypes.INTEGER,
-    image_url: DataTypes.STRING
+  Campaign.init({
+    title: DataTypes.STRING,
+    store_address: DataTypes.STRING,
+    description: DataTypes.STRING,
+    location: DataTypes.GEOMETRY('POINT'),
+    distance: DataTypes.DOUBLE,
+    display_started_at: DataTypes.DATE,
+    display_ended_at: DataTypes.DATE,
   }, {
     sequelize,
-    tableName: 'market_images',
-    modelName: 'marketImages',
+    tableName: 'campaigns',
+    modelName: 'campaigns',
     timestamps: true,
     underscored: true,
     charset: 'utf8',
     collate: 'utf8_general_ci',
   });
-  return MarketImages;
+  return Campaign;
 };

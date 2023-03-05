@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Market.init({
+    name: DataTypes.STRING,
     address: DataTypes.STRING,
     description: DataTypes.STRING,
     location_address: DataTypes.STRING,
@@ -28,8 +29,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    tableName: 'markets',
-    modelName: 'market',
+    tableName: 'stores',
+    modelName: 'stores',
     timestamps: true,
     underscored: true,
     charset: 'utf8',
