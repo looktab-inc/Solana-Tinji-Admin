@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     address: DataTypes.STRING,
     description: DataTypes.STRING,
     location_address: DataTypes.STRING,
+    cover_url: DataTypes.STRING,
     open_time: {
       type: DataTypes.JSON,
       get() {

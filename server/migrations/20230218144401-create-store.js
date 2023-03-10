@@ -16,6 +16,10 @@ module.exports = {
         type: Sequelize.STRING,
         comment: 'wallet 주소'
       },
+      cover_url: {
+        type: Sequelize.STRING,
+        comment: '가게 이미지',
+      },
       description: {
         type: Sequelize.TEXT
       },

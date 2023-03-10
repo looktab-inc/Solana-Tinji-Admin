@@ -26,12 +26,6 @@ module.exports = {
       distance: {
         type: Sequelize.DOUBLE
       },
-      display_started_at: {
-        type: Sequelize.DATE,
-      },
-      display_ended_at: {
-        type: Sequelize.DATE,
-      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,

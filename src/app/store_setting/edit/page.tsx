@@ -16,11 +16,20 @@ const dataPromise = getData()
 export default function StoreSettingEdit() {
   const router = useRouter()
   const data = use(dataPromise)
-  const [storeName, setStoreName] = useState((data && data.name) || '')
-  const [startTime, setStartTime] = useState((data && data.open_time &&  data.open_time.start) || '')
-  const [endTime, setEndTime] = useState((data && data.open_time &&  data.open_time.end) || '')
-  const [description, setDescription] = useState((data && data.description) || '')
-  const [location, setLocation] = useState((data && data.location_address) || '')
+  const [storeName, setStoreName] = useState('')
+  const [startTime, setStartTime] = useState('')
+  const [endTime, setEndTime] = useState('')
+  const [description, setDescription] = useState('')
+  const [location, setLocation] = useState('')
+
+  useEffect(() => {
+    setStoreName((data && data.name) || '')
+    setStartTime((data && data.open_time &&  data.open_time.start) || '')
+    setEndTime((data && data.open_time &&  data.open_time.end) || '')
+    setDescription((data && data.description) || '')
+    setLocation((data && data.location_address) || '')
+  }, [data])
+
 
   const handleClickSave = async () => {
     const params = {
@@ -33,7 +42,7 @@ export default function StoreSettingEdit() {
       }
     }
     await axios.post('/api/store', params)
-      .then(_ => {router.back()})
+      .then(_ => {router.push(`/store_setting`)})
   }
 
   const handleClickClose = () => {

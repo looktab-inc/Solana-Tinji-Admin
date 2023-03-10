@@ -28,7 +28,7 @@ const handler =
           })
 
           if (!store) {
-            await db.store.create({
+            await db.stores.create({
               address: market_address
             })
           }

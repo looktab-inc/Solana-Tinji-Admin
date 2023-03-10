@@ -12,6 +12,9 @@ module.exports = {
       store_address: {
         type: Sequelize.STRING
       },
+      holder_address : {
+        type: Sequelize.STRING
+      },
       nft_address: {
         type: Sequelize.STRING
       },

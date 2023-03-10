@@ -24,7 +24,7 @@ export default function StoreSetting() {
   }
 
   const getTime = (openTime) => {
-    if (openTime.start && openTime.end) {
+    if (openTime && openTime.start && openTime.end) {
       return `${getAMPMTime(openTime.start)} - ${getAMPMTime(openTime.end)}`
     }
   }

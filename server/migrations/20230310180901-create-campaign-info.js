@@ -1,22 +1,29 @@
 'use strict';
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('reviews', {
+    await queryInterface.createTable('campaign_infos', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      store_address: {
-        type: Sequelize.STRING(100)
+      campaign_id: {
+        type: Sequelize.INTEGER
       },
-      reviewer_address: {
-        type: Sequelize.STRING(100)
+      discount_type: {
+        type: Sequelize.ENUM('amount', 'rate'),
       },
-      comment: {
-        type: Sequelize.STRING(10000)
+      image_url: {
+        type: Sequelize.STRING,
+      },
+      display_started_at: {
+        type: Sequelize.DATE
+      },
+      display_ended_at: {
+        type: Sequelize.DATE
       },
       createdAt: {
         allowNull: false,
@@ -29,6 +36,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('reviews');
+    await queryInterface.dropTable('campaign_infos');
   }
 };
