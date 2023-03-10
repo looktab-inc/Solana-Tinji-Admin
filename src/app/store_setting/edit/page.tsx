@@ -14,13 +14,13 @@ export async function getData() {
 const dataPromise = getData()
 
 export default function StoreSettingEdit() {
-  const router = useRouter()
-  const data = use(dataPromise)
   const [storeName, setStoreName] = useState('')
   const [startTime, setStartTime] = useState('')
   const [endTime, setEndTime] = useState('')
   const [description, setDescription] = useState('')
   const [location, setLocation] = useState('')
+  const router = useRouter()
+  const data = use(dataPromise)
 
   useEffect(() => {
     setStoreName((data && data.name) || '')
@@ -91,7 +91,7 @@ export default function StoreSettingEdit() {
                 <div className="flex justify-between">
                   <input
                     type={'time'}
-                    className="flex-1 h-[56px] bg-[#1C1C1C] rounded-xl border border-[#343434] py-[16px] px-[24px]"
+                    className="flex-1 h-[56px] bg-[#1C1C1C] rounded-xl border border-[#343434] py-[16px] px-[24px] mr-[12px]"
                     value={startTime}
                     onChange={(e) => handleChangeStartTime(e)}
                   />

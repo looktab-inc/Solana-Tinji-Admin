@@ -13,6 +13,9 @@ module.exports = {
       campaign_id: {
         type: Sequelize.INTEGER
       },
+      nft_type: {
+        type: Sequelize.ENUM('standard', 'dynamic'),
+      },
       discount_type: {
         type: Sequelize.ENUM('amount', 'rate'),
       },

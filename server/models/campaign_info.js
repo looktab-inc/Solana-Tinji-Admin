@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   campaign_info.init({
     campaign_id: DataTypes.NUMBER,
+    nft_type: DataTypes.STRING,
     discount_type: DataTypes.STRING,
     image_url: DataTypes.STRING,
     display_started_at: DataTypes.DATE,
