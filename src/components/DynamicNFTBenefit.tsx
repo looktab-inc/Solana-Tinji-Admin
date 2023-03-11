@@ -1,14 +1,33 @@
 import React, {FC, useContext, useRef, useState} from "react";
-import Image from "next/image";
 import axios from "axios";
 import {AppContext} from "@/context/AppContext";
 import CustomRadio from "@/components/CustomRadio";
 
-export const DynamicNFTBenefit: FC = ({}) => {
-  const { dynamicNFT, changeDynamicNFT } = useContext(AppContext);
+export interface Props {
+  eventDays: number;
+  startDate: Date;
+  endDate: Date;
+}
+export const DynamicNFTBenefit: FC<Props> = ({eventDays, startDate, endDate}) => {
+  const { createNFTs, changeCreateNFT } = useContext(AppContext);
 
   const getBlockLabel = (index) => {
     return index === 1 ? 'First period' : 'Second period';
+  }
+
+  const changeDays = (id, value) => {
+    const rest = eventDays - (Number(value))
+    changeCreateNFT(id, 'days', Number(value))
+    changeCreateNFT(id, 'display_started_at')
+
+    const dynamicNFTs = createNFTs.filter(createNFT => {
+      return (createNFT.nftType === 'dynamic' && createNFT.id !== id)
+    })
+
+    if (dynamicNFTs.length > 0) {
+      const dynamicNFT = dynamicNFTs[0]
+      changeCreateNFT(dynamicNFT.id, 'days', rest)
+    }
   }
 
   return (
@@ -16,24 +35,28 @@ export const DynamicNFTBenefit: FC = ({}) => {
       <div className='bg-[#191A1E] p-[20px] mt-[20px] rounded-[20px]'>
         <p className="text-[16px] font-medium">Benefit</p>
         {
-          dynamicNFT.map((nft, index) =>
-            <DynamicNFTItem
-              key={index}
-              index={index}
-              blockName={getBlockLabel(index)}
-              dynamicNFT={dynamicNFT[index]}
-              changeDynamicNFT={changeDynamicNFT}
-            />
-          )
+          createNFTs.map((createNFT, index) => {
+            if (createNFT.nftType === 'dynamic') {
+              return (
+                <DynamicNFTItem
+                  key={index}
+                  eventDays={eventDays}
+                  blockName={getBlockLabel(index)}
+                  dynamicNFT={createNFT}
+                  changeDynamicNFT={changeCreateNFT}
+                  changeDays={changeDays}
+                />
+              )
+            }
+          })
         }
       </div>
     </>
   );
 }
 
-type Props = {
+type ItemProps = {
   blockName: string;
-  index: number;
   dynamicNFT: {
     discountType: string,
     discountAmount: number,
@@ -41,15 +64,19 @@ type Props = {
     imageUrl: string,
     imageName: string,
     days: number,
+    id: number;
   };
   changeDynamicNFT?: any;
+  eventDays: number;
+  changeDays: any;
 }
 
-const DynamicNFTItem: FC<Props> = ({
+const DynamicNFTItem: FC<ItemProps> = ({
   blockName,
-  index,
   dynamicNFT,
-  changeDynamicNFT
+  changeDynamicNFT,
+  eventDays,
+  changeDays
 }) => {
   const uploadFile = useRef(null)
 
@@ -67,32 +94,23 @@ const DynamicNFTItem: FC<Props> = ({
     const file = e.target.files[0]
     const formData = new FormData();
     formData.append('image', file)
-    await axios.post('/api/campaign/image', formData, {
+    await axios.post('/api/upload/image', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       }
     }).then( response => {
       const {image} = response.data
-      changeDynamicNFT(index, 'imageName', file.name)
-      changeDynamicNFT(index, 'imageUrl', image)
+      changeDynamicNFT(dynamicNFT.id, 'imageName', file.name)
+      changeDynamicNFT(dynamicNFT.id, 'imageUrl', image)
     })
   }
 
   const changeDiscountType = (discountType) => {
-    changeDynamicNFT(index, 'discountType', discountType)
+    changeDynamicNFT(dynamicNFT.id, 'discountType', discountType)
   }
 
-  const changeDays = (e) => {
-    changeDynamicNFT(index, 'days', e.target.value)
-  }
-
-  const changeDiscountValue = (e) => {
-    const value = e.target.value
-    if (dynamicNFT.discountType === 'amount') {
-      changeDynamicNFT(index, 'discountAmount', value)
-    } else {
-      changeDynamicNFT(index, 'discountRate', value)
-    }
+  const changeDiscountValue = (key, value) => {
+    changeDynamicNFT(dynamicNFT.id, key, value)
   }
 
   return (
@@ -105,11 +123,12 @@ const DynamicNFTItem: FC<Props> = ({
           <div className="flex items-center">
             <input
               type="number"
-              className="w-[535px]  placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px] mt-[12px]"
+              className="w-[535px]  placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px] mt-[12px]"
               placeholder="Please enter the first discount period."
-              defaultValue={dynamicNFT.days}
-              onChange={changeDays}
+              value={dynamicNFT.days}
+              onChange={(e) => {changeDays(dynamicNFT.id , e.target.value)}}
               min={0}
+              max={eventDays - 1}
             />
             <span className="ml-[12px]">days</span>
           </div>
@@ -123,10 +142,10 @@ const DynamicNFTItem: FC<Props> = ({
             />
             <input
               type="number"
-              className="w-[339px]  placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
+              className="w-[339px]  placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
               placeholder="Enter discount amount"
-              defaultValue={dynamicNFT.discountAmount}
-              onChange={changeDiscountValue}
+              value={dynamicNFT.discountAmount}
+              onChange={(e) => changeDiscountValue("discountAmount", e.target.value)}
               min={0}
             />
           </li>
@@ -138,10 +157,10 @@ const DynamicNFTItem: FC<Props> = ({
             />
             <input
               type="number"
-              className="w-[339px] placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
+              className="w-[339px] placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
               placeholder="Enter discount rate"
               defaultValue={dynamicNFT.discountRate}
-              onChange={changeDiscountValue}
+              onChange={(e) => changeDiscountValue("discountRate", e.target.value)}
               min={0}
               max={100}
             />
@@ -150,7 +169,7 @@ const DynamicNFTItem: FC<Props> = ({
         <p className="text-[16px] font-medium mt-[40px]">NFT img</p>
         <div className="mt-[12px] flex justify-start items-center w-full">
           <label htmlFor="uploadFile"
-                 className="w-[440px]  placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
+                 className="w-[440px]  placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
           >
             {dynamicNFT.imageName}
           </label>
@@ -165,7 +184,7 @@ const DynamicNFTItem: FC<Props> = ({
             accept="image/jpg, image/png, image/jpeg"
             style={{display: "none"}}
             ref={uploadFile}
-            className="w-full  placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
+            className="w-full  placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
             placeholder="Please enter the title"
             defaultValue={''}
             onChange={onChangeUploadImage}

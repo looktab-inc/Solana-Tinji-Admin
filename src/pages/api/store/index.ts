@@ -42,7 +42,7 @@ const handler =
       }
     })
     .post(async ( req: NextApiRequest, res: NextApiResponse<void>) => {
-      const {name, description, location_address, open_time} = req.body
+      const {name, description, location_address, open_time, cover_url} = req.body
       const cookies = parse(req.headers.cookie || '')
       const address = cookies.address
       await db.stores.update(
@@ -50,7 +50,8 @@ const handler =
           name: name,
           description: description,
           location_address: location_address,
-          open_time: open_time
+          open_time: open_time,
+          cover_url: cover_url
         },
         {where: {address: address}}
       ).then(_ => {

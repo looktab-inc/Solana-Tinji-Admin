@@ -14,7 +14,7 @@ const CustomSelect = React.forwardRef<HTMLElement, Props>(
           {
             addressList.map((address, index) => {
               return (
-                <li className={`px-[23px] py-[16px]  cursor-default  ${index === 0? '' : ' border-t border-[#373A43]'} `} onClick={() => onClick(address)}>
+                <li key={index} className={`px-[23px] py-[16px]  cursor-default  ${index === 0? '' : ' border-t border-[#373A43]'} `} onClick={() => onClick(address)}>
                   <p className={"text-[16px] font-medium"}>{address.title}</p>
                   <p className={"text-[16px] font-normal"}>{address.address}</p>
                 </li>

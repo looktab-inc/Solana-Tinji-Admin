@@ -1,17 +1,24 @@
 "use client";
 
-import {FC, useContext, useEffect, useState} from 'react'
+import {FC, useCallback, useContext, useEffect, useState} from 'react'
 import AppProvider, {AppContext} from '@/context/AppContext';
 import {PageHeader} from "@/components/PageHeader";
 import { useRouter } from 'next/navigation';
 import Image from "next/image";
 import {Lnb} from "@/components/lnb";
-
+import Cookies from 'js-cookie'
+import axios from 'axios';
+import {dateFormatWithDot} from "@/util/dateUtil";
 
 export default function DashBoard() {
   const { account, disconnectWallet, connectWallet } = useContext(AppContext);
   const [activeCampaign, setActiveCampaign] = useState([]);
+  const [campaigns, setCampaigns] = useState([])
   const router = useRouter();
+
+  useEffect(() => {
+    getCampaigns()
+  }, [])
 
   const handleActiveCampaign = (index: number) => {
     if (activeCampaign.includes(index)) {
@@ -21,56 +28,19 @@ export default function DashBoard() {
     }
   };
 
-  const Campaigns = [
-    {
-      title: 'Campaign Title1',
-      disLikeCount: 1,
-      likeCount: 2,
-      usedCount: 2,
-      impression: '93/100',
-      list: [
-        {
-          wallet: 'walletAddress',
-          state: 'Redeem',
-          time: '2023.01.03 13:33:12',
-        },
-        {
-          wallet: 'walletAddress',
-          state: 'Expiration',
-          time: '2023.01.03 13:33:12',
-        },
-        {
-          wallet: 'walletAddress',
-          state: 'Used',
-          time: '2023.01.03 13:33:12',
-        },
-      ],
-    },
-    {
-      title: 'Campaign Title2',
-      disLikeCount: 3,
-      likeCount: 4,
-      usedCount: 1,
-      impression: '93/100',
-      list: [
-        {
-          wallet: 'walletAddress',
-          state: 'Redeem',
-          time: '2023.01.03 13:33:12',
-        },
-        {
-          wallet: 'walletAddress',
-          state: 'Expiration',
-          time: '2023.01.03 13:33:12',
-        },
-        {
-          wallet: 'walletAddress',
-          state: 'Used',
-          time: '2023.01.03 13:33:12',
-        },
-      ],
-    }
-  ]
+  const getCampaigns = async () => {
+    const address = Cookies.get('address')
+    await axios.get(`/api/campaign/${address}`, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    }).then(response => {
+      const {list} = response.data
+      setCampaigns(list)
+    }).catch(e => {
+      setCampaigns([])
+    })
+  }
 
   const handleClickGoToCreateCampaign = () => {
     router.push('/create')
@@ -91,162 +61,143 @@ export default function DashBoard() {
                 Create NFT Campaign
               </button>
             </div>
-            <div className="flex flex-col bg-[#23262C] rounded-[24px]">
-              <div className="flex flex-col mt-[28px] px-[40px] h-[40px]">
-                <div className="flex flex-row justify-between items-center">
-                  <div className="text-[16px] text-[#727272] ml-[32px]">
-                    Campaign Title
+            <div className="bg-[#23262C] rounded-[24px] px-[40px] py-[20px] max-h-[823px] overflow-auto">
+              <div className={"flex flex-row justify-between items-center text-[#9CA3B3] py-[17px] text-[18px] text-[#9CA3B3] border-b border-[#373A43]"}>
+                <div className='flex'>Campaign Title</div>
+                <div className="flex flex-row justify-end mr-[55px]">
+                  <div className="flex justify-center items-center px-[33px]">
+                    <div className={"w-[20px] h-[20px] mr-[4px] mb-[2px] relative"}>
+                      <Image
+                        src="/images/icon/icon-unlike.png"
+                        alt="unlike"
+                        fill
+                      />
+                    </div>
+                    <span>None</span>
                   </div>
-                  <div className="flex flex-row mr-[70px]">
-                    <div className="flex justify-center px-[25px]">
+                  <div className="flex justify-center items-center px-[33px]">
+                    <div className={"w-[20px] h-[20px] mr-[4px] mb-[2px] relative"}>
                       <Image
-                        src="/images/unlike.png"
+                        src="/images/icon/icon-unlike.png"
                         alt="unlike"
-                        width={20}
-                        height={20}
-                        className="mr-[4px]"
+                        fill
                       />
-                      <p className="text-[16px] text-[#727272]">Unlike</p>
-                    </div>
-                    <div className="flex justify-center px-[25px]">
-                      <Image
-                        src="/images/like.png"
-                        alt="unlike"
-                        width={20}
-                        height={20}
-                        className="mr-[4px]"
-                      />
-                      <p className="text-[16px] text-[#727272]">Like</p>
                     </div>
 
-                    <div className="flex justify-center px-[25px]">
+                    <span>DisLike</span>
+                  </div>
+                  <div className="flex justify-center items-center px-[33px]">
+                    <div className={"w-[20px] h-[20px] mr-[4px] mb-[2px] relative"}>
                       <Image
-                        src="/images/used.png"
-                        alt="unlike"
-                        width={20}
-                        height={20}
-                        className="mr-[4px]"
+                        src="/images/icon/icon-like.png"
+                        alt="like"
+                        fill
                       />
-                      <p className="text-[16px] text-[#727272]">Used</p>
                     </div>
-
-                    <div className="text-[16px] text-[#727272] px-[15px]">
-                      Impression
+                    <span>Like</span>
+                  </div>
+                  <div className="flex justify-center items-center px-[33px]">
+                    <div className={"w-[20px] h-[20px] mr-[4px] mb-[2px] relative"}>
+                      <Image
+                        src="/images/icon/icon-used.png"
+                        alt="used"
+                        fill
+                      />
                     </div>
+                    <span>Used</span>
+                  </div>
+                  <div>
+                    Impression
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col px-[40px]">
-                {Campaigns.map((campaign, index) =>
-                  activeCampaign.includes(index) ? (
-                    <>
-                      <div className="flex flex-col rounded-2xl mb-[12px]">
-                        <div className="h-[80px] flex flex-row  rounded-2xl items-center px-[32px] py-[20px] justify-between">
-                          <div className="text-[20px] text-white">
-                            {campaign.title}
-                          </div>
-                          <div className="flex flex-row ">
-                            <div className="text-[20px] text-[#619AFF] px-[55px]">
-                              {campaign.disLikeCount}
-                            </div>
-                            <div className="text-[20px] text-[#FF569D] px-[38px]">
-                              {campaign.likeCount}
-                            </div>
-                            <div className="text-[20px] text-[#4BC5A0] px-[38px]">
-                              {campaign.usedCount}
-                            </div>
-                            <div className="text-[20px] text-[#B3B3B3] px-[30px]">
-                              {campaign.impression}
-                            </div>
-                            <Image
-                              src="/images/up.png"
-                              alt="fold"
-                              width={40}
-                              height={40}
-                              className="cursor-pointer"
-                              onClick={() => handleActiveCampaign(index)}
-                            />
-                          </div>
+              <div className="flex flex-col">
+                {campaigns.map((campaign, index) =>
+                  <>
+                    <div className={`
+                      py-[36.5px] flex flex-row items-center justify-between 
+                      ${campaigns.length -1  === index ||  activeCampaign.includes(index) ? '' : 'border-b border-[#373A43]'}
+                      `}>
+                      <div className="text-[20px] text-white">
+                        {campaign.title}
+                      </div>
+                      <div className="flex flex-row ">
+                        <div className="text-[20px] text-[#9CA3B3] px-[70.5px]">
+                          {campaign.none_count}
                         </div>
-                        <div className="flex flex-col px-[32px] pb-[32px] bg-[#373A43]">
-                          <div className="flex flex-row justify-between">
-                            <div className="text-[#D7D7D7]">Like List</div>
-                            <div className="text-[16px] text-[#B3B3B3]">
+                        <div className="text-[20px] text-[#619AFF] px-[51px]">
+                          {campaign.dislike_count}
+                        </div>
+                        <div className="text-[20px] text-[#FF569D] px-[63px]">
+                          {campaign.like_count}
+                        </div>
+                        <div className="text-[20px] text-[#4BC5A0] px-[35.5px]">
+                          {campaign.used_count}
+                        </div>
+                        <div className="text-[20px] text-[#B3B3B3] px-[32.5px]">
+                          {campaign.impress}
+                        </div>
+                        <Image
+                          src={`${activeCampaign.includes(index) ? '/images/icon/icon-list-open.png' : '/images/icon/icon-list-close.png'}`}
+                          alt="fold"
+                          width={40}
+                          height={40}
+                          className="cursor-pointer"
+                          onClick={() => handleActiveCampaign(index)}
+                        />
+                      </div>
+                    </div>
+                    {
+                      activeCampaign.includes(index) ?
+                        <div className={"bg-[#373A43] p-[20px] rounded-[36px]"}>
+                          <div className="flex flex-row justify-between p-[12px]">
+                            <div className="text-white text-[20px]">Like List</div>
+                            <div className="text-[16px] text-[#9CA3B3]">
                               2 NFTs have not yet been minted. If the period
                               has passed, an automatic refund will be
                               processed.
                             </div>
                           </div>
-                          <div className="flex flex-col mt-[12px] py-[12px] px-[20px] bg-[#1C1C1C] rounded-2xl">
-                            <div className="flex flex-row justify-between">
-                              <p className="px-[32px]">Wallet Address</p>
-                              <div className="flex flex-row">
-                                <p className="px-[15px]">NFT Status</p>
-                                <p className="px-[80px]">Date</p>
-                              </div>
+                          <div className={"px-[12px] py-[14px] border-b border-[#41444E] flex flex-row justify-between "}>
+                            <p className="text-[16px] ">Wallet Address</p>
+                            <div className="flex flex-row">
+                              <p className="px-[15px]">NFT Status</p>
+                              <p className="px-[80px]">Date</p>
                             </div>
-                            {campaign.list.map((user, index) => (
-                              <>
-                                <div className="flex flex-row justify-between h-[56px] items-center  text-[16px]">
-                                  <p className="px-[32px] font-medium">
-                                    {user.wallet}
-                                  </p>
-                                  <div className="flex flex-row justify-center items-center">
-                                    {user.state === "Redeem" && (
-                                      <p className="px-[12px] py-[6px] text-[#C5D1FF] bg-[#2E385A] rounded-2xl">
-                                        {user.state}
-                                      </p>
-                                    )}
-                                    {user.state === "Expiration" && (
-                                      <p className="px-[12px] py-[6px] text-[#D7D7D7] bg-[#474747] rounded-2xl">
-                                        {user.state}
-                                      </p>
-                                    )}
-                                    {user.state === "Used" && (
-                                      <p className="px-[12px] py-[6px] text-[#B1FFE8] bg-[#2B443D] rounded-2xl">
-                                        {user.state}
-                                      </p>
-                                    )}
-                                    <p className="px-[30px]">{user.time}</p>
-                                  </div>
+                          </div>
+                          {campaign.nft_info.map((user, index) => (
+                            <>
+                              <div className={`flex flex-row justify-between items-center  text-[16px] px-[12px] py-[22px]
+                              ${campaign.nft_info.length -1  === index ? '' : 'border-b border-[#41444E]'}
+                              `}>
+                                <p className="font-medium">
+                                  {user.holder_address}
+                                </p>
+                                <div className="flex flex-row justify-center items-center">
+                                  {user.state === "None" && (
+                                    <p className="px-[12px] py-[6px] text-[#C5D1FF] bg-[#2E385A] rounded-2xl">
+                                      {user.state}
+                                    </p>
+                                  )}
+                                  {user.state === "Expiration" && (
+                                    <p className="px-[12px] py-[6px] text-[#D7D7D7] bg-[#474747] rounded-2xl">
+                                      {user.state}
+                                    </p>
+                                  )}
+                                  {user.state === "Used" && (
+                                    <p className="px-[12px] py-[6px] text-[#B1FFE8] bg-[#2B443D] rounded-2xl">
+                                      {user.state}
+                                    </p>
+                                  )}
+                                  <p className="px-[30px]">{dateFormatWithDot(new Date(user.time))}</p>
                                 </div>
-                              </>
-                            ))}
-                          </div>
+                              </div>
+                            </>
+                          ))}
                         </div>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="h-[80px] flex flex-row bg-black mb-[12px] rounded-2xl items-center px-[32px] py-[20px] justify-between">
-                        <div className="text-[20px] text-white">
-                          {campaign.title}
-                        </div>
-                        <div className="flex flex-row ">
-                          <div className="text-[20px] text-[#619AFF] px-[55px]">
-                            {campaign.disLikeCount}
-                          </div>
-                          <div className="text-[20px] text-[#FF569D] px-[38px]">
-                            {campaign.likeCount}
-                          </div>
-                          <div className="text-[20px] text-[#4BC5A0] px-[38px]">
-                            {campaign.usedCount}
-                          </div>
-                          <div className="text-[20px] text-[#B3B3B3] px-[30px]">
-                            {campaign.impression}
-                          </div>
-                          <Image
-                            src="/images/low.png"
-                            alt="fold"
-                            width={40}
-                            height={40}
-                            className="cursor-pointer"
-                            onClick={() => handleActiveCampaign(index)}
-                          />
-                        </div>
-                      </div>
-                    </>
-                  )
+                        : <></>
+                    }
+                  </>
                 )}
               </div>
             </div>

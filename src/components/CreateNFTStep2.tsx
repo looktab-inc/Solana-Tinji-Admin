@@ -1,12 +1,16 @@
 import React, {useRef} from "react";
-import {CountryCodes} from "@/util/IOSCounryCode";
 import CustomSelect from "@/components/CustomSelect";
 import Map, {Layer, Marker, NavigationControl, Source} from "react-map-gl";
 import * as turf from "@turf/turf";
+import SearchIcon from '@mui/icons-material/Search';
+import CustomSelectCountry from "@/components/CustomSelectCountry";
 
 export interface Props {
   country: string;
-  setCountry: any,
+  handelChangeCountry: any,
+  searchCountry: any;
+  countrySearchResult: any;
+  handleClickCountry: any;
   address: string;
   handleChangeAddress: any;
   searchAddress: any;
@@ -22,7 +26,10 @@ export interface Props {
 const CreateNFTStep2 = React.forwardRef<HTMLElement, Props>(
   ({
      country,
-     setCountry,
+     handelChangeCountry,
+     searchCountry,
+     countrySearchResult,
+     handleClickCountry,
      address,
      handleChangeAddress,
      searchAddress,
@@ -39,35 +46,36 @@ const CreateNFTStep2 = React.forwardRef<HTMLElement, Props>(
       <div className="h-[724px]">
         <div className="mb-[20px]">
           <p className="text-[16px] font-medium  mb-[12px]">Country</p>
-          <select
-            className="form-select appearance-none
-                        block
-                        w-full
-                        rounded-xl border  py-[16px] px-[24px]
-                        text-base
-                        font-normal
-                       border-[#646B7C] bg-[#191A1E]
-                        transition
-                        ease-in-out
-                        "
-            value={country}
-            aria-label="Default select example"
-            onChange={(e) => setCountry(e.target.value)}
-          >
-            {
-              CountryCodes.map(countryCode => <option key={countryCode[0]} value={countryCode[0]}>{countryCode[1]}</option>)
-            }
-          </select>
+          <div className="flex w-full h-[56px] placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]">
+            <input
+              className="w-full placeholder:text-[#646B7C] bg-[#191A1E]"
+              style={{outline: 'none', border: 'none'}}
+              placeholder="Please enter your country"
+              value={country}
+              onChange={handelChangeCountry}
+              onKeyDown={searchCountry}
+            />
+            <SearchIcon onClick={searchCountry}/>
+          </div>
+
+          {
+            countrySearchResult.length > 0 &&
+            <CustomSelectCountry countryList={countrySearchResult} onClick={handleClickCountry}/>
+          }
         </div>
         <div className="mb-[20px]">
           <p className="text-[16px] font-medium  mb-[12px]">Address</p>
-          <input
-            className="w-full h-[56px]  placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
-            placeholder="Please enter your address"
-            value={address}
-            onChange={handleChangeAddress}
-            onKeyDown={searchAddress}
-          />
+          <div className="flex w-full h-[56px] placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]">
+            <input
+              className="w-full placeholder:text-[#646B7C] bg-[#191A1E]"
+              style={{outline: 'none', border: 'none'}}
+              placeholder="Please enter your address"
+              value={address}
+              onChange={handleChangeAddress}
+              onKeyDown={searchAddress}
+            />
+            <SearchIcon onClick={searchAddress}/>
+          </div>
           {
             addressSearchResult.length > 0 &&
             <CustomSelect addressList={addressSearchResult} onClick={handleClickAddress}/>
@@ -91,9 +99,9 @@ const CreateNFTStep2 = React.forwardRef<HTMLElement, Props>(
             onChange={(e) => handleLocalRange(e)}
           >
             <option value={0}>Select local range</option>
-            <option value="1">1 km</option>
-            <option value="5">5 km</option>
-            <option value="10">10 km</option>
+            <option value={1}>1 km</option>
+            <option value={5}>5 km</option>
+            <option value={10}>10 km</option>
           </select>
         </div>
         <div className="h-[350px]">

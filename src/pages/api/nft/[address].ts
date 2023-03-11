@@ -3,6 +3,7 @@ import nextConnect from 'next-connect'
 import db, { Sequelize } from "../../../../server/models";
 import {Op} from "sequelize";
 import SolanaHelper from "@/pages/solana_helper";
+import {NFT_STATUS} from "../../../../server/enums/generic_enum";
 
 type NFT = {
   nft_address: string,
@@ -32,6 +33,9 @@ const handler =
         const campaigns = await db.campaigns.findAll({
           where: {
             $and: db.sequelize.where(whereQuery, 1),
+            display_started_at: {
+              [Op.lte]: new Date()
+            }
           },
           include: [
             {
@@ -70,7 +74,8 @@ const transfer = async (campaigns: any, transferAddress: string) => {
               if (result) {
                 await db.nfts.update(
                   {
-                    holder_address: mintAddress
+                    holder_address: transferAddress,
+                    status: NFT_STATUS.NONE
                   },
                   {where: {id: mintNft.id}}
                 )

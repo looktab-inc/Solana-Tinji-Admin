@@ -12,6 +12,7 @@ type GetDetail = {
   address: string,
   description: string,
   location_address: string,
+  cover_url: string,
   open_time: any
 }
 
@@ -33,6 +34,7 @@ const handler =
             address: store.address,
             description: store.description,
             location_address: store.location_address,
+            cover_url: store.cover_url,
             open_time: JSON.parse(store.open_time)
           });
         } else {

@@ -13,58 +13,72 @@ type Account = {
   address: string;
 }
 
-const defaultStandardNFTInfo = {
-  discountType: 'amount',
-  discountAmount: 0,
-  discountRate: 0,
-  imageUrl: '',
-  imageName:' Upload NFT img'
-}
-
-const defaultDynamicNFTInfo = {
-  discountType: 'amount',
-  discountAmount: 0,
-  discountRate: 0,
-  imageUrl: '',
-  imageName:' Upload NFT img',
-  days: 0,
-}
-
-
 export const AppProvider = (props: AppProps) => {
   const router = useRouter();
   const [account, setAccount] = useState<Account>(null);
   const [error, setError] = useState<any>("");
   const [provider, setProvider] = useState<any>(null)
-  const [standardNFT, setStandardNFT] = useState<any>(defaultStandardNFTInfo)
-  const [dynamicNFT, setDynamicNFT] = useState<any>([defaultDynamicNFTInfo, defaultDynamicNFTInfo])
+  const [createNFTs, setCreateNFTs] = useState<any>([])
 
-  const changeStandardNFT = (key, value) => {
-    console.log(value)
-    standardNFT[`${key}`] = value
-    console.log(key, standardNFT[`${key}`] )
-    setStandardNFT(standardNFT)
-    console.log(standardNFT)
-  }
-
-  const changeDynamicNFT = (changeIndex, key, value) => {
-    console.log(changeIndex, key, value)
-    const nextState = dynamicNFT.map((nft, index) => {
-      if (index === changeIndex) {
+  const changeCreateNFT = (id, key, value) => {
+    const nextState = createNFTs.map(nft => {
+      if (nft.id === id) {
         nft[`${key}`] = value
       }
       return nft
     })
-    setDynamicNFT(nextState)
-    console.log(dynamicNFT)
+    setCreateNFTs(nextState)
+    console.log(createNFTs)
   }
 
-  const resetStandardNFT = () => {
-    setStandardNFT(defaultStandardNFTInfo)
-  }
+  const setDefaultNFTs = () => {
+    if (createNFTs.length > 0) {
+      setCreateNFTs([])
+    }
 
-  const resetDynamicNFT = () => {
-    setDynamicNFT([defaultDynamicNFTInfo, defaultDynamicNFTInfo])
+    let defaultNFTs = []
+
+    defaultNFTs.push({
+      id: 0,
+      nftType: 'standard',
+      discountType: 'amount',
+      discountAmount: 0,
+      discountRate: 0,
+      imageUrl: '',
+      imageName:' Upload NFT img',
+      display_started_at: '',
+      display_ended_at: '',
+    })
+    defaultNFTs.push({
+      id: 1,
+      days: 0,
+      nftType: 'dynamic',
+      discountType: 'amount',
+      discountAmount: 0,
+      discountRate: 0,
+      imageUrl: '',
+      imageName:' Upload NFT img',
+      display_started_at: '',
+      display_ended_at: '',
+    })
+    defaultNFTs.push({
+      id: 2,
+      days: 0,
+      nftType: 'dynamic',
+      discountType: 'amount',
+      discountAmount: 0,
+      discountRate: 0,
+      imageUrl: '',
+      imageName:' Upload NFT img',
+      display_started_at: '',
+      display_ended_at: '',
+    })
+    setCreateNFTs(defaultNFTs)
+    console.log(createNFTs)
+  };
+
+  const resetCreateNFTs = () => {
+    setCreateNFTs([])
   }
 
   const connectWallet = async () => {
@@ -99,6 +113,17 @@ export const AppProvider = (props: AppProps) => {
     return (account && account.address) || false
   }
 
+  const transferWithPhantom = async () => {
+    return new Promise(async (resolve, reject) => {
+      if (!provider) {
+        await connectWallet()
+        return reject()
+      }
+
+
+    })
+  }
+
   useEffect(() => {
     const location = window.location.pathname
     const address = Cookies.get('address')
@@ -127,12 +152,10 @@ export const AppProvider = (props: AppProps) => {
         connectWallet,
         disconnectWallet,
         error,
-        standardNFT,
-        changeStandardNFT,
-        resetStandardNFT,
-        dynamicNFT,
-        changeDynamicNFT,
-        resetDynamicNFT
+        changeCreateNFT,
+        resetCreateNFTs,
+        createNFTs,
+        setDefaultNFTs
     }}
     >
       {props.children}

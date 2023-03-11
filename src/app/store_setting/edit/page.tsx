@@ -1,13 +1,13 @@
 "use client";
 
-import {use, useEffect, useState} from "react"
+import React, {use, useEffect, useRef, useState} from "react"
 import {Lnb} from "@/components/lnb";
 import {PageHeader} from "@/components/PageHeader";
 import axios from "axios";
 import {useRouter} from "next/navigation";
 
 export async function getData() {
-  const res = await fetch('/api/store')
+  const res = await fetch('/api/store',{ cache: 'no-store'})
   return await res.json()
 }
 
@@ -19,14 +19,14 @@ export default function StoreSettingEdit() {
   const [endTime, setEndTime] = useState('')
   const [description, setDescription] = useState('')
   const [location, setLocation] = useState('')
+  const [image, setImage] = useState('')
+  const [imageName, setImageName] = useState('Upload Store img')
   const router = useRouter()
   const data = use(dataPromise)
+  const uploadFile = useRef(null)
 
   useEffect(() => {
     setInitialState(data)
-    return () => {
-
-    }
   }, [data])
 
   const setInitialState = (initialData) => {
@@ -37,12 +37,12 @@ export default function StoreSettingEdit() {
     setLocation((initialData && initialData.location_address) || '')
   }
 
-
   const handleClickSave = async () => {
     const params = {
       name: storeName,
       description: description,
       location_address: location,
+      cover_url: image || '',
       open_time: {
         start: startTime,
         end: endTime
@@ -53,7 +53,7 @@ export default function StoreSettingEdit() {
   }
 
   const handleClickClose = () => {
-    router.back()
+    router.push(`/store_setting`)
   }
 
   const handleStoreName = (e) => {
@@ -76,6 +76,31 @@ export default function StoreSettingEdit() {
     setEndTime(e.currentTarget.value)
   }
 
+  const handleClickUploadImage = (e) => {
+    if (!uploadFile) {
+      return
+    }
+    uploadFile.current.click()
+  }
+
+  const onChangeUploadImage = async (e) => {
+    if (!e.target.files) {
+      return;
+    }
+    const file = e.target.files[0]
+    const formData = new FormData();
+    formData.append('image', file)
+    await axios.post('/api/upload/image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    }).then( response => {
+      const {image} = response.data
+      setImageName(file.name)
+      setImage(image)
+    })
+  }
+
   return (
     <>
       <div className="flex h-[100vh]">
@@ -85,51 +110,77 @@ export default function StoreSettingEdit() {
           <div className={`max-w-[1000px] min-h-[884px] bg-[#23262C] p-[40px] rounded-[24px] m-[48px]`}>
             <div className="w-[600px]">
               <div className="mb-[20px]">
-                <p className="text-[16px] font-medium">Store Name</p>
+                <p className="text-[16px] font-medium mb-[12px]">Store Name</p>
                 <input
-                  className="w-[600px] h-[56px]  placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
+                  className="w-[600px] h-[56px]  placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
                   placeholder="Please enter the store name"
                   value={storeName}
                   onChange={(e) => handleStoreName(e)}
                 />
               </div>
               <div className="mb-[20px]">
-                <p className="text-[16px] font-medium">Operating hours</p>
+                <p className="text-[16px] font-medium mb-[12px]">Operating hours</p>
                 <div className="flex justify-between">
                   <input
                     type={'time'}
-                    className="flex-1 h-[56px] rounded-xl borderborder-[#646B7C] bg-[#191A1E] py-[16px] px-[24px] mr-[12px]"
+                    className="flex-1 h-[56px] rounded-xl  py-[16px] px-[24px] mr-[12px] border border-[#646B7C] bg-[#191A1E]"
                     value={startTime}
                     onChange={(e) => handleChangeStartTime(e)}
                   />
                   <input
                     type={'time'}
-                    className="flex-1 h-[56px]  rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
+                    className="flex-1 h-[56px]  rounded-xl py-[16px] px-[24px] border border-[#646B7C] bg-[#191A1E]"
                     value={endTime}
                     onChange={(e) => handleChangeEndTime(e)}
                   />
                 </div>
               </div>
               <div className="mb-[20px]">
-                <p className="text-[16px] font-medium">Location</p>
+                <p className="text-[16px] font-medium mb-[12px]">Location</p>
                 <input
-                  className="w-[600px] h-[56px]  placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
+                  className="w-[600px] h-[56px]  placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
                   placeholder="Please enter the store location"
                   value={location}
                   onChange={(e) => handleLocation(e)}
                 />
               </div>
               <div className="mb-[20px]">
-                <p className="text-[16px] font-medium">Store description</p>
+                <p className="text-[16px] font-medium mb-[12px]">Store description</p>
                 <textarea
-                  className="flex-1 w-full h-[200px] bg-[#1C1C1C] placeholder:text-[#727272] rounded-xl border border-[#343434] py-[16px] px-[24px]"
+                  className="flex-1 w-full h-[200px] placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
                   value={description}
                   placeholder="Please enter the store description"
                   onChange={(e) => handleChangeDescription(e)}
                 />
               </div>
+              <div>
+                <p className="text-[16px] font-medium mb-[12px]">Store img</p>
+                <div className="mt-[12px] flex justify-start items-center w-full">
+                  <label htmlFor="uploadFile"
+                         className="w-[465px]  placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
+                  >
+                    {imageName}
+                  </label>
+                  <button
+                    onClick={handleClickUploadImage}
+                    className="w-[120px] h-[56px] text-[20px] font-bold rounded-[12px] outline outline-[#646B7C] ml-[12px]">
+                    Upload
+                  </button>
+                  <input
+                    id="uploadFile"
+                    type="file"
+                    accept="image/jpg, image/png, image/jpeg"
+                    style={{display: "none"}}
+                    ref={uploadFile}
+                    className="w-full  placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
+                    placeholder="Please enter the title"
+                    defaultValue={''}
+                    onChange={onChangeUploadImage}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="flex justify-between items-center mt-[200px]">
+            <div className="flex justify-between items-center mt-[53px]">
               <button
                 className="justify-center items-center w-[120px] h-[56px] text-[20px] font-bold rounded-[12px] outline outline-[#646B7C]"
                 onClick={handleClickClose}

@@ -18,10 +18,85 @@ type GetData = {
   open_time: any
 }
 
+type Campaigns = {
+  list: Array<Campaign>
+}
+
+type Campaign = {
+  id: number,
+  title: string,
+  impress: string,
+  dislike_count: number,
+  like_count: number,
+  used_count: number,
+  none_count: number,
+  nft_info: Array<NFTInfo>
+}
+
+type NFTInfo = {
+  id: number,
+  holder_address?: string,
+  status?: string,
+  time?: string,
+}
+
 const handler =
   nextConnect()
-    .get(async ( req: NextApiRequest, res: NextApiResponse<GetData>) => {
-      // 현재 위치 기반으로 가져와서 nft 보여주기? 주기?
+    .get(async ( req: NextApiRequest, res: NextApiResponse<Campaigns>) => {
+      const {address} = req.query
+
+      const campaigns = await db.campaigns.findAll({
+        where: {
+          store_address: {
+            [Op.eq]: address,
+          },
+        },
+        include: [
+          {
+            model: db.nfts,
+            as: "nfts",
+          },
+        ]
+      })
+
+      let campaignList = []
+      campaigns.forEach(campaign => {
+        let dislikeCount = 0
+        let likeCount = 0
+        let usedCount = 0
+        let noneCount = 0
+        let nftList = []
+
+        campaign.nfts.forEach(nft => {
+          if (nft.status === NFT_STATUS.NONE) noneCount+= 1
+          else if (nft.status === NFT_STATUS.LIKE) likeCount+=1
+          else if (nft.status === NFT_STATUS.DISLIKE) dislikeCount+=1
+          else if (nft.status === NFT_STATUS.USED) usedCount+=1
+
+          if (nft.status) {
+            nftList.push({
+              id: nft.id,
+              holder_address: nft.holder_address,
+              status: nft.status,
+              time: nft.updatedAt
+            })
+          }
+        })
+
+        campaignList.push({
+          id: campaign.id,
+          title: campaign.title,
+          impress: `${dislikeCount + likeCount + usedCount + noneCount}/100`,
+          dislike_count: dislikeCount,
+          like_count: likeCount,
+          used_count: usedCount,
+          none_count: noneCount,
+          nft_info: nftList
+        })
+      })
+      res.status(200).json({
+        list: campaignList
+      })
     })
     .post(async ( req: NextApiRequest, res: NextApiResponse<void>) => {
       const {address} = req.query
@@ -52,6 +127,7 @@ const handler =
           boundary: boundary
         })
 
+        // TODO 다이나믹 nft 날짜 조정
         const campaignSettingsDto = campaign_settings.map(campaign_setting => {
           return {
             campaign_id: campaign.id,
@@ -110,7 +186,6 @@ const createNFT = async (campaignId: number, title: string, description: string,
           campaign_id: campaignId,
           store_address: address,
           nft_address: nft.address.toString(),
-          status: NFT_STATUS.NONE
         })
       }
       return resolve(true)

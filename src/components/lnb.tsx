@@ -31,7 +31,7 @@ export const Lnb: FC = () => {
 
   return (
     <>
-      <div className="w-[280px] px-[20px] border-r border-[#1C1C1C]">
+      <div className="w-[280px] px-[20px] border-r border-[#1C1C1C] min-w-[280px]">
         <div className="w-full h-[100px] relative">
           <Image
             src="/images/admin-logo.svg"

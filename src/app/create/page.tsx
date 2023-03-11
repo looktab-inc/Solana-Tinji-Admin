@@ -1,65 +1,44 @@
 "use client";
 
-import {useContext, useRef, useState} from "react";
+import {useContext, useEffect, useRef, useState} from "react";
 import Image from "next/image";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import CustomInput from "@/components/CustomInput";
 import {useRouter} from "next/navigation";
 import {PageHeader} from "@/components/PageHeader";
 import {Lnb} from "@/components/lnb";
-import Map, {Layer, Marker, NavigationControl, Source, useMap} from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import axios from "axios";
-import * as turf from "@turf/turf";
-import {StandardNFTBenefit} from "@/components/StandardNFTBenefit";
+
 import Cookies from 'js-cookie'
-import {CountryCodes} from "@/util/IOSCounryCode";
-import moment from "moment";
-import {DynamicNFTBenefit} from "@/components/DynamicNFTBenefit";
 import {AppContext} from "@/context/AppContext";
-import CustomSelect from "@/components/CustomSelect";
 import CreateNFTStep1 from "@/components/CreateNFTStep1";
 import CreateNFTStep2 from "@/components/CreateNFTStep2";
-
-const defaultStandardNFTInfo = {
-  discountType: 'amount',
-  discountAmount: 0,
-  discountRate: 0,
-  imageUrl: '',
-  imageName:' Upload NFT img'
-}
-
-const defaultDynamicNFTInfo = {
-  discountType: 'amount',
-  discountAmount: 0,
-  discountRate: 0,
-  imageUrl: '',
-  imageName:' Upload NFT img',
-  days: 0,
-}
+import CreateNFTStep3 from "@/components/CreateNFTStep3";
+import {CountryCodes} from "@/util/IOSCounryCode";
 
 export default function CreateNFT() {
-  const { standardNFT, resetStandardNFT, dynamicNFT, resetDynamicNFT } = useContext(AppContext);
-
+  const { setDefaultNFTs } = useContext(AppContext)
+  const { createNFTs, changeCreateNFT } = useContext(AppContext)
   const router = useRouter()
   const mapRef = useRef(null)
   const [step, setStep] = useState(0)
   const [range, setRange] = useState(0)
-  const [searchCountryInput, setSearchCountryInput] = useState("")
   const [country, setCountry] = useState("")
+  const [countryCode, setCountryCode] = useState("")
   const [address, setAddress] = useState('')
-  const [endDate, setEndDate] = useState<Date>(new Date())
-  const [startDate, setStartDate] = useState<Date>(new Date())
+  const [endDate, setEndDate] = useState<Date>(null)
+  const [startDate, setStartDate] = useState<Date>(null)
   const [nftType, setNftType] = useState('')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [addressSearchResult, setAddressSearchResult] = useState([])
+  const [countrySearchResult, setCountrySearchResult] = useState([])
   const [completeStep, setCompleteStep] = useState({
     step1: false,
     step2: false,
     step3: false
   })
+  const [eventDays, setEventDays] = useState(0)
 
   const [marker, setMarker] = useState({
     longitude: 0,
@@ -70,42 +49,43 @@ export default function CreateNFT() {
     latitude: 0,
   })
 
+  useEffect(() => {
+    setDefaultNFTs()
+  }, [])
+
   const handleClickNext = () => {
-    if (step === 0) {
-      setCompleteStep({
-        ...completeStep,
-        step1: title.length > 0 && description.length > 0
-      })
-    } else if (step === 1) {
-      setCompleteStep({
-        ...completeStep,
-        step2: !!(marker.latitude && marker.longitude)
-      })
-    } else {
-      setCompleteStep({
-        ...completeStep,
-        step3: !!(startDate && endDate)
-      })
-    }
+    changeCompleteStatus()
     setStep(step + 1 > 2 ? 2 : step + 1)
   }
 
+  const changeCompleteStatus = () => {
+    setCompleteStep({
+      step1: title.length > 0 && description.length > 0,
+      step2: !!(marker.latitude && marker.longitude && range > 0),
+      step3: !!(startDate && endDate && nftType)
+    })
+    console.log(completeStep)
+  }
+
   const handleClickPrev = () => {
+    changeCompleteStatus()
     setStep(step - 1 < 0 ? 0 : step - 1)
+    changeCompleteStatus()
   }
 
   const handleLocalRange = (e) => {
     setRange(e.target.value)
+    changeCompleteStatus()
   }
 
   const handleChangeAddress = async(e) => {
     setAddress(e.target.value)
   }
 
-  const search = async (e) => {
-    if (e.code === 'Enter') {
+  const searchAddress = async (e) => {
+    if ((e.type === "keydown" && e.code === 'Enter') || e.type === "click") {
       await axios.get(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?country=${country}&proximity=ip&access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`)
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?country=${countryCode}&proximity=ip&access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`)
         .then(response => {
           const {features} = response.data
           const searchResult = features.map(feature => {
@@ -116,28 +96,57 @@ export default function CreateNFT() {
             }
           })
           setAddressSearchResult(searchResult)
-
         })
     }
   }
 
   const handleChangeNFTType = (nftType) => {
     setNftType(nftType)
+    changeCompleteStatus()
+  }
+
+  const getDate = (date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}-${month >= 10 ? month : '0' + month}-${day >= 10 ? day : '0' + day}`
   }
 
   const handleClickPayment = async () => {
     const address = Cookies.get('address')
-    await axios.post(`/api/campaign/${address}`, {
-      title: title,
-      description: description,
-      lng: marker?.longitude,
-      lat: marker?.latitude,
-      distance: range
-    }).then(_ => {
-      resetDynamicNFT()
-      resetStandardNFT()
-      setStep(3)
-    })
+    changeCompleteStatus()
+    if (completeStep.step1 && completeStep.step2 && completeStep.step3) {
+      let campaignSettings = []
+      createNFTs.filter(createNFT => {
+        return createNFT.nftType === nftType
+      }).forEach(createNFT => {
+        if (createNFT.nftType === 'standard') {
+          createNFT.display_started_at = getDate(startDate)
+          createNFT.display_ended_at = getDate(endDate)
+        } else {
+
+        }
+        createNFT.dicount_value = createNFT.discountType === 'rate' ?
+          createNFT.discountRate : createNFT.discountAmount
+        campaignSettings.push(createNFT)
+      })
+
+      const params = {
+        title: title,
+        description: description,
+        lng: marker?.longitude,
+        lat: marker?.latitude,
+        distance: range,
+        display_started_at: getDate(startDate),
+        display_ended_at: getDate(endDate),
+        campaign_settings : campaignSettings,
+      }
+
+      await axios.post(`/api/campaign/${address}`, params)
+        .then(_ => {
+        setStep(3)
+      })
+    }
   }
 
   const handleClickAddress = (address) => {
@@ -152,6 +161,47 @@ export default function CreateNFT() {
     mapRef.current?.flyTo({center: address.center})
     setAddress(address.address)
     setAddressSearchResult([])
+    changeCompleteStatus()
+  }
+
+  const handleClickCountry = (country) => {
+    setCountry(country[1])
+    setCountryCode(country[0])
+    setCountrySearchResult([])
+    changeCompleteStatus()
+  }
+
+  const handelChangeCountry = (e) => {
+    setCountry(e.target.value)
+  }
+
+  const searchCountry = (e) => {
+    if ((e.type === "keydown" && e.code === 'Enter') || e.type === "click") {
+      const searchResult = CountryCodes.filter(countryCode => {
+        return countryCode[1].match(country.toLocaleUpperCase())
+      })
+      console.log(searchResult)
+      setCountrySearchResult(searchResult)
+    }
+  }
+
+  const changeStartDate = (date) => {
+    setStartDate(date)
+    console.log(date)
+    if (endDate) {
+      let difference = endDate.getTime() - date.getTime();
+      setEventDays(Math.ceil(difference / (1000 * 3600 * 24)))
+    }
+    changeCompleteStatus()
+  }
+
+  const changeEndDate = (date) => {
+    setEndDate(date)
+    if (startDate) {
+      let difference = date.getTime() - startDate.getTime();
+      setEventDays(Math.ceil(difference / (1000 * 3600 * 24)))
+    }
+    changeCompleteStatus()
   }
 
   return (
@@ -243,84 +293,23 @@ export default function CreateNFT() {
                      layer={layer}
                      mapRef={mapRef}
                      marker={marker}
-                     range={range} searchAddress={search}
-                     setCountry={setCountry}/>
+                     range={range} searchAddress={searchAddress}
+                     handelChangeCountry={handelChangeCountry}
+                     handleClickCountry={handleClickCountry}
+                     countrySearchResult={countrySearchResult}
+                     searchCountry={searchCountry}
+                    />
                   }
                   {
                     step === 2 &&
-                    <div className="h-[724px]">
-                      <div className="mb-[20px]">
-                        <p className="text-[16px] font-medium">NFT Available period</p>
-                        <div className="flex justify-between mt-[12px] w-full">
-                          <DatePicker
-                            fixedHeight
-                            selected={startDate}
-                            onChange={(date: Date) => setStartDate(date)}
-                            className='mr-[12px]'
-                            customInput={<CustomInput />}
-                          />
-                          <DatePicker
-                            fixedHeight
-                            selected={endDate}
-                            onChange={(date: Date) => setEndDate(date)}
-                            customInput={<CustomInput />}
-                          />
-                        </div>
-                      </div>
-                      <div className="">
-                        <p className="text-[16px] font-medium">NFT Type</p>
-                        <ul className="flex w-full justify-between items-stretch mt-[12px]">
-                          <li className='flex-1'>
-                            <input type="radio" id="standard" name="standard" value="hosting-small" className="hidden peer" required/>
-                            <label htmlFor="standard"
-                                   onClick={() => {handleChangeNFTType('standard')}}
-                                   className={`${nftType === 'standard'? 'inline-flex items-center justify-center group bg-gradient-to-br from-[#7500D1] via-[#4F83FF] to-[#63E9EB]' : 'bg-[#191A1E] border border-[#646B7C]'}
-                                 relative inline-flex items-center justify-between w-full p-[0.05rem] rounded-[13px] cursor-pointer`}>
-                              <div className="block text-white w-full bg-[#191A1E] p-5 rounded-[13px]">
-                                <div className="w-full text-[18px] font-bold">Standard NFT</div>
-                                <div className="w-full text-[14px]">Same discount over time</div>
-                                <Image
-                                  src={`${nftType === 'standard'? '/images/active.svg' : '/images/inactive.svg'}`}
-                                  alt="active"
-                                  width={20}
-                                  height={20}
-                                  className="absolute top-[34px] right-[24px]"
-                                />
-                              </div>
-                            </label>
-                          </li>
-                          <li className='flex-1 ml-[12px]'>
-                            <input type="radio" id="hosting-big" name="dynamic" value="hosting-big" className="hidden peer"/>
-                            <label htmlFor="standard"
-                                   onClick={() => {handleChangeNFTType('dynamic')}}
-                                   className={`${nftType === 'dynamic'? ' inline-flex items-center justify-center bg-gradient-to-br from-[#7500D1] via-[#4F83FF] to-[#63E9EB]' : 'bg-[#191A1E] border border-[#646B7C]'}
-                                 relative inline-flex items-center justify-between w-full p-[1px] rounded-[13px] cursor-pointer`}>
-                              <div className="block text-white w-full bg-[#191A1E] p-5 rounded-[13px]">
-                                <div className="w-full text-[18px] font-bold">Dynamic NFT</div>
-                                <div className="w-full text-[14px]">Fluctuating discounts by period</div>
-                                <Image
-                                  src={`${nftType === 'dynamic'? '/images/active.svg' : '/images/inactive.svg'}`}
-                                  alt="active"
-                                  width={20}
-                                  height={20}
-                                  className="absolute top-[34px] right-[24px]"
-                                />
-                              </div>
-                            </label>
-                          </li>
-                        </ul>
-                        {
-                          nftType === 'standard' &&
-                          <StandardNFTBenefit/>
-                        }
-                        {
-                          nftType === 'dynamic' &&
-                          <>
-                            <DynamicNFTBenefit/>
-                          </>
-                        }
-                      </div>
-                    </div>
+                    <CreateNFTStep3 startDate={startDate}
+                                    endDate={endDate}
+                                    changeStartDate={changeStartDate}
+                                    changeEndDate={changeEndDate}
+                                    NFTType={nftType}
+                                    changeNFTType={handleChangeNFTType}
+                                    eventDays={eventDays}
+                    />
                   }
                 </div>
                 <div className="flex justify-between flex-row-reverse border-t border-[#41444E] pt-[24px] bg-[#23262C]">

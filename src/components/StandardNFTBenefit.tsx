@@ -1,18 +1,31 @@
-import React, {FC, useContext, useRef, useState} from "react";
-import Image from "next/image";
-import axios from "axios";
-import {AppContext} from "@/context/AppContext";
-import CustomRadio from "@/components/CustomRadio";
-
-export interface Props {
-  changeStandardNFT? : any;
-}
-
+import React, {FC, useContext, useEffect, useRef, useState} from "react"
+import Image from "next/image"
+import axios from "axios"
+import {AppContext} from "@/context/AppContext"
+import CustomRadio from "@/components/CustomRadio"
 
 export const StandardNFTBenefit: FC = ({}) => {
-  const { standardNFT, changeStandardNFT } = useContext(AppContext);
+  const { createNFTs, changeCreateNFT } = useContext(AppContext);
+  const [standardNFT, setStandardNFT] = useState({
+    id: 0,
+    nftType: 'standard',
+    discountType: 'amount',
+    discountAmount: 0,
+    discountRate: 0,
+    imageUrl: '',
+    imageName:' Upload NFT img',
+    display_started_at: '',
+    display_ended_at: '',
+  })
 
   const uploadFile = useRef(null)
+
+  useEffect(() => {
+    const defaultStandardNFT = createNFTs.filter(createNFT => {
+      return createNFT.nftType === 'standard'
+    })
+    setStandardNFT(defaultStandardNFT[0])
+  })
 
   const handleClickUploadImage = (e) => {
     if (!uploadFile) {
@@ -28,29 +41,23 @@ export const StandardNFTBenefit: FC = ({}) => {
     const file = e.target.files[0]
     const formData = new FormData();
     formData.append('image', file)
-    await axios.post('/api/campaign/image', formData, {
+    await axios.post('/api/upload/image', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       }
     }).then( response => {
       const {image} = response.data
-      changeStandardNFT('imageUrl', `${image}`)
-      changeStandardNFT('imageName', file.name)
+      changeCreateNFT(standardNFT.id, 'imageUrl', `${image}`)
+      changeCreateNFT(standardNFT.id, 'imageName', file.name)
     })
   }
 
   const changeDiscountType = (discountType) => {
-    changeStandardNFT('discountType', discountType)
-    console.log(standardNFT.discountType)
+    changeCreateNFT(standardNFT.id, 'discountType', discountType)
   }
 
-  const changeDiscountValue = (e) => {
-    const value = e.target.value
-    if (standardNFT.discountType === 'amount') {
-      changeStandardNFT('discountAmount', value)
-    } else {
-      changeStandardNFT('discountRate', value)
-    }
+  const changeDiscountValue = (key, value) => {
+    changeCreateNFT(standardNFT.id, key, value)
   }
 
   return (
@@ -70,10 +77,10 @@ export const StandardNFTBenefit: FC = ({}) => {
             </div>
             <input
               type="number"
-              className="w-[339px] placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px] cursor-point"
+              className="w-[339px] placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px] cursor-point"
               placeholder="Enter discount amount"
               defaultValue={standardNFT.discountAmount}
-              onChange={changeDiscountValue}
+              onChange={(e) => changeDiscountValue("discountAmount", e.target.value)}
               min={0}
             />
           </li>
@@ -85,10 +92,10 @@ export const StandardNFTBenefit: FC = ({}) => {
             />
             <input
               type="number"
-              className="w-[339px] placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
+              className="w-[339px] placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
               placeholder="Enter discount rate"
               defaultValue={standardNFT.discountRate}
-              onChange={changeDiscountValue}
+              onChange={(e) => changeDiscountValue("discountRate", e.target.value)}
               min={0}
               max={100}
             />
@@ -97,7 +104,7 @@ export const StandardNFTBenefit: FC = ({}) => {
         <p className="text-[16px] font-medium mt-[40px]">NFT img</p>
         <div className="mt-[12px] flex justify-start items-center w-full">
           <label htmlFor="uploadFile"
-                 className="w-[440px]  placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
+                 className="w-[440px]  placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
           >
             {standardNFT.imageName}
           </label>
@@ -112,7 +119,7 @@ export const StandardNFTBenefit: FC = ({}) => {
             accept="image/jpg, image/png, image/jpeg"
             style={{display: "none"}}
             ref={uploadFile}
-            className="w-full placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
+            className="w-full placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
             placeholder="Please enter the title"
             defaultValue={''}
             onChange={onChangeUploadImage}
