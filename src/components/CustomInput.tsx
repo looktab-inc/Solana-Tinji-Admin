@@ -49,7 +49,7 @@ const CustomInput = React.forwardRef<HTMLElement, Props>(
   ({ value, onClick, disabled, readOnly, buttonOnly, ...props }, ref) => {
     return (
       <InputWrapper {...props}>
-        <Input value={value} onClick={onClick} placeholder="기간을 선택해주세요"></Input>
+        <Input defaultValue={value} onClick={onClick} placeholder="기간을 선택해주세요" className={"border border-[#646B7C] bg-[#191A1E]"}></Input>
         {props.InputProps ? (
           props.InputProps.endAdornment
         ) : (

@@ -188,7 +188,7 @@ export default function CreateNFT() {
                         Title
                       </p>
                       <input
-                        className="w-[600px] h-[56px] bg-[#1C1C1C] placeholder:text-[#727272] rounded-xl border border-[#343434] py-[16px] px-[24px]"
+                        className="w-[600px] h-[56px]  placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
                         placeholder="Please enter the title of your NFT"
                         value={nftTitle}
                         onChange={(e) => handleNftTitle(e)}
@@ -280,7 +280,7 @@ export default function CreateNFT() {
                         Zip code
                       </p>
                       <input
-                        className="w-[600px] h-[56px] bg-[#1C1C1C] placeholder:text-[#727272] rounded-xl border border-[#343434] py-[16px] px-[24px]"
+                        className="w-[600px] h-[56px] placeholder:text-[#727272] rounded-xl border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
                         placeholder="Please enter your zip code."
                         value={zip}
                         onChange={(e) => handleZip(e)}
@@ -289,7 +289,7 @@ export default function CreateNFT() {
                         Address
                       </p>
                       <input
-                        className="w-[600px] h-[56px] bg-[#1C1C1C] placeholder:text-[#727272] rounded-xl border border-[#343434] py-[16px] px-[24px]"
+                        className="w-[600px] h-[56px]  placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
                         placeholder="Please enter your address."
                         value={address}
                         onChange={(e) => handleAddress(e)}

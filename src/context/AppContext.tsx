@@ -39,21 +39,23 @@ export const AppProvider = (props: AppProps) => {
   const [standardNFT, setStandardNFT] = useState<any>(defaultStandardNFTInfo)
   const [dynamicNFT, setDynamicNFT] = useState<any>([defaultDynamicNFTInfo, defaultDynamicNFTInfo])
 
-
   const changeStandardNFT = (key, value) => {
     console.log(value)
-    setStandardNFT({
-      ...standardNFT,
-      [`${key}`]: value
-    })
+    standardNFT[`${key}`] = value
+    console.log(key, standardNFT[`${key}`] )
+    setStandardNFT(standardNFT)
     console.log(standardNFT)
   }
 
-  const changeDynamicNFT = (index, key, value) => {
-    console.log(index, key, value)
-    let newArr = [...dynamicNFT];
-    newArr[index][`${key}`] = value
-    setDynamicNFT(newArr)
+  const changeDynamicNFT = (changeIndex, key, value) => {
+    console.log(changeIndex, key, value)
+    const nextState = dynamicNFT.map((nft, index) => {
+      if (index === changeIndex) {
+        nft[`${key}`] = value
+      }
+      return nft
+    })
+    setDynamicNFT(nextState)
     console.log(dynamicNFT)
   }
 

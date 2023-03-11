@@ -2,15 +2,30 @@ import React, {FC, useContext, useRef, useState} from "react";
 import Image from "next/image";
 import axios from "axios";
 import {AppContext} from "@/context/AppContext";
+import CustomRadio from "@/components/CustomRadio";
 
 export const DynamicNFTBenefit: FC = ({}) => {
   const { dynamicNFT, changeDynamicNFT } = useContext(AppContext);
+
+  const getBlockLabel = (index) => {
+    return index === 1 ? 'First period' : 'Second period';
+  }
+
   return (
     <>
       <div className='bg-[#191A1E] p-[20px] mt-[20px] rounded-[20px]'>
         <p className="text-[16px] font-medium">Benefit</p>
-        <DynamicNFTItem blockName={'First period'} key={0} index={0} dynamicNFT={dynamicNFT[0]} changeDynamicNFT={changeDynamicNFT}/>
-        <DynamicNFTItem blockName={'Second period'} key={1} index={1} dynamicNFT={dynamicNFT[1]} changeDynamicNFT={changeDynamicNFT}/>
+        {
+          dynamicNFT.map((nft, index) =>
+            <DynamicNFTItem
+              key={index}
+              index={index}
+              blockName={getBlockLabel(index)}
+              dynamicNFT={dynamicNFT[index]}
+              changeDynamicNFT={changeDynamicNFT}
+            />
+          )
+        }
       </div>
     </>
   );
@@ -90,9 +105,9 @@ const DynamicNFTItem: FC<Props> = ({
           <div className="flex items-center">
             <input
               type="number"
-              className="w-[535px] bg-[#1C1C1C] placeholder:text-[#727272] rounded-xl border border-[#343434] py-[16px] px-[24px] mt-[12px]"
+              className="w-[535px]  placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px] mt-[12px]"
               placeholder="Please enter the first discount period."
-              value={dynamicNFT.days}
+              defaultValue={dynamicNFT.days}
               onChange={changeDays}
               min={0}
             />
@@ -100,36 +115,32 @@ const DynamicNFTItem: FC<Props> = ({
           </div>
         </div>
         <ul className="mt-[12px]">
-          <li className="flex justify-start items-center" onClick={() => changeDiscountType('amount')}>
-            <Image
-              src={`${dynamicNFT.discountType === 'amount'? '/images/active.svg' : '/images/inactive.svg'}`}
-              alt="active"
-              width={20}
-              height={20}
+          <li className="flex justify-start items-center">
+            <CustomRadio
+              active={dynamicNFT.discountType == 'amount'}
+              label={`Discounted amount`}
+              onClick={() => changeDiscountType('amount')}
             />
-            <span className="text-[18px] ml-[8px] w-[200px]">Discounted amount</span>
             <input
               type="number"
-              className="w-[339px] bg-[#1C1C1C] placeholder:text-[#727272] rounded-xl border border-[#343434] py-[16px] px-[24px]"
+              className="w-[339px]  placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
               placeholder="Enter discount amount"
-              value={dynamicNFT.discountAmount}
+              defaultValue={dynamicNFT.discountAmount}
               onChange={changeDiscountValue}
               min={0}
             />
           </li>
-          <li className="flex justify-start items-center mt-[12px]" onClick={() => changeDiscountType('rate')}>
-            <Image
-              src={`${dynamicNFT.discountType === 'rate'? '/images/active.svg' : '/images/inactive.svg'}`}
-              alt="active"
-              width={20}
-              height={20}
+          <li className="flex justify-start items-center mt-[12px]">
+            <CustomRadio
+              active={dynamicNFT.discountType == 'rate'}
+              label={`Discounted rate`}
+              onClick={() => changeDiscountType('rate')}
             />
-            <span className="text-[18px] ml-[8px] w-[200px]">Discount rate</span>
             <input
               type="number"
-              className="w-[339px] bg-[#1C1C1C] placeholder:text-[#727272] rounded-xl border border-[#343434] py-[16px] px-[24px]"
+              className="w-[339px] placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
               placeholder="Enter discount rate"
-              value={dynamicNFT.discountRate}
+              defaultValue={dynamicNFT.discountRate}
               onChange={changeDiscountValue}
               min={0}
               max={100}
@@ -139,7 +150,7 @@ const DynamicNFTItem: FC<Props> = ({
         <p className="text-[16px] font-medium mt-[40px]">NFT img</p>
         <div className="mt-[12px] flex justify-start items-center w-full">
           <label htmlFor="uploadFile"
-                 className="w-[440px] bg-[#1C1C1C] placeholder:text-[#727272] rounded-xl border border-[#343434] py-[16px] px-[24px]"
+                 className="w-[440px]  placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
           >
             {dynamicNFT.imageName}
           </label>
@@ -154,8 +165,9 @@ const DynamicNFTItem: FC<Props> = ({
             accept="image/jpg, image/png, image/jpeg"
             style={{display: "none"}}
             ref={uploadFile}
-            className="w-full bg-[#1C1C1C] placeholder:text-[#727272] rounded-xl border border-[#343434] py-[16px] px-[24px]"
+            className="w-full  placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
             placeholder="Please enter the title"
+            defaultValue={''}
             onChange={onChangeUploadImage}
           />
         </div>

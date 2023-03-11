@@ -16,9 +16,22 @@ type ReviewList = {
 
 const handler =
   nextConnect()
-    .post(
+    .get(
       async ( req: NextApiRequest, res: NextApiResponse<ReviewList>) => {
         const { address } = req.query
+
+        const store = await db.stores.findOne({
+          where: {
+            address: {
+              [Op.eq]: address,
+            },
+          },
+        })
+
+        if (!store) {
+          res.status(500).end()
+        }
+
         const reviews = await db.review.findOne({
           where: {
             store_address: {

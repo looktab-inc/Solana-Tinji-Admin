@@ -18,6 +18,26 @@ import {CountryCodes} from "@/util/IOSCounryCode";
 import moment from "moment";
 import {DynamicNFTBenefit} from "@/components/DynamicNFTBenefit";
 import {AppContext} from "@/context/AppContext";
+import CustomSelect from "@/components/CustomSelect";
+import CreateNFTStep1 from "@/components/CreateNFTStep1";
+import CreateNFTStep2 from "@/components/CreateNFTStep2";
+
+const defaultStandardNFTInfo = {
+  discountType: 'amount',
+  discountAmount: 0,
+  discountRate: 0,
+  imageUrl: '',
+  imageName:' Upload NFT img'
+}
+
+const defaultDynamicNFTInfo = {
+  discountType: 'amount',
+  discountAmount: 0,
+  discountRate: 0,
+  imageUrl: '',
+  imageName:' Upload NFT img',
+  days: 0,
+}
 
 export default function CreateNFT() {
   const { standardNFT, resetStandardNFT, dynamicNFT, resetDynamicNFT } = useContext(AppContext);
@@ -26,13 +46,15 @@ export default function CreateNFT() {
   const mapRef = useRef(null)
   const [step, setStep] = useState(0)
   const [range, setRange] = useState(0)
-  const [country, setCountry] = useState("KR")
+  const [searchCountryInput, setSearchCountryInput] = useState("")
+  const [country, setCountry] = useState("")
   const [address, setAddress] = useState('')
   const [endDate, setEndDate] = useState<Date>(new Date())
   const [startDate, setStartDate] = useState<Date>(new Date())
   const [nftType, setNftType] = useState('')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [addressSearchResult, setAddressSearchResult] = useState([])
   const [completeStep, setCompleteStep] = useState({
     step1: false,
     step2: false,
@@ -86,19 +108,15 @@ export default function CreateNFT() {
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?country=${country}&proximity=ip&access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`)
         .then(response => {
           const {features} = response.data
-          console.log('test')
-          if (features.length > 0) {
-            const location = features[0]
-            setLayer({
-              longitude: location.center[0],
-              latitude: location.center[1],
-            })
-            setMarker({
-              longitude: location.center[0],
-              latitude: location.center[1],
-            })
-            mapRef.current?.flyTo({center: location.center})
-          }
+          const searchResult = features.map(feature => {
+            return {
+              center: feature.center,
+              title: feature.text,
+              address: feature.place_name
+            }
+          })
+          setAddressSearchResult(searchResult)
+
         })
     }
   }
@@ -114,16 +132,26 @@ export default function CreateNFT() {
       description: description,
       lng: marker?.longitude,
       lat: marker?.latitude,
-      distance: range,
-      display_started_at: moment(startDate).format('YYYY-mm-dd HH:ss:mm'),
-      display_ended_at: moment(endDate).format('YYYY-mm-dd HH:ss:mm'),
-      nft_type: nftType,
-      nft_info: nftType ? [standardNFT] : dynamicNFT,
+      distance: range
     }).then(_ => {
       resetDynamicNFT()
       resetStandardNFT()
       setStep(3)
     })
+  }
+
+  const handleClickAddress = (address) => {
+    setLayer({
+      longitude: address.center[0],
+      latitude: address.center[1],
+    })
+    setMarker({
+      longitude: address.center[0],
+      latitude: address.center[1],
+    })
+    mapRef.current?.flyTo({center: address.center})
+    setAddress(address.address)
+    setAddressSearchResult([])
   }
 
   return (
@@ -197,122 +225,26 @@ export default function CreateNFT() {
                 <div className={'overflow-y-auto '}>
                   {
                     step === 0 &&
-                    <div className="h-[724px]">
-                      <div className="mb-[20px]">
-                        <p className="text-[16px] font-medium mb-[12px]">Title for user</p>
-                        <input
-                          className="w-full h-[56px] bg-[#1C1C1C] placeholder:text-[#727272] rounded-xl border border-[#343434] py-[16px] px-[24px]"
-                          placeholder="Please enter the title"
-                          value={title}
-                          onChange={e => setTitle(e.target.value)}
-                        />
-                      </div>
-                      <div className="mb-[20px]">
-                        <p className="text-[16px] font-medium  mb-[12px]">NFT description</p>
-                        <textarea
-                          className="flex-1 w-full h-[200px] bg-[#1C1C1C] placeholder:text-[#727272] rounded-xl border border-[#343434] py-[16px] px-[24px]"
-                          placeholder="Please enter the description"
-                          value={description}
-                          onChange={e => setDescription(e.target.value)}
-                        />
-                      </div>
-                    </div>
+                    <CreateNFTStep1
+                      title={title}
+                      changeTitle={setTitle}
+                      description={description}
+                      changeDescription={setDescription}/>
                   }
                   {
                     step === 1 &&
-                    <div className="h-[724px]">
-                      <div className="mb-[20px]">
-                        <p className="text-[16px] font-medium  mb-[12px]">Country</p>
-                        <select
-                          className="form-select appearance-none
-                        block
-                        w-full
-                        rounded-xl border border-[#343434] py-[16px] px-[24px]
-                        text-base
-                        font-normal
-                        bg-[#1C1C1C]
-                        transition
-                        ease-in-out
-                        "
-                          value={country}
-                          aria-label="Default select example"
-                          onChange={(e) => setCountry(e.target.value)}
-                        >
-                          {
-                            CountryCodes.map(countryCode => <option key={countryCode[0]} value={countryCode[0]}>{countryCode[1]}</option>)
-                          }
-                        </select>
-                      </div>
-                      <div className="mb-[20px]">
-                        <p className="text-[16px] font-medium  mb-[12px]">Address</p>
-                        <input
-                          className="w-full h-[56px] bg-[#1C1C1C] placeholder:text-[#727272] rounded-xl border border-[#343434] py-[16px] px-[24px]"
-                          placeholder="Please enter your address"
-                          value={address}
-                          onChange={handleChangeAddress}
-                          onKeyDown={search}
-                        />
-                      </div>
-                      <div className="mb-[20px]">
-                        <p className="text-[16px] font-medium  mb-[12px]">Local range</p>
-                        <select
-                          className="form-select appearance-none
-                        block
-                        w-full
-                        rounded-xl border border-[#343434] py-[16px] px-[24px]
-                        text-base
-                        font-normal
-                        bg-[#1C1C1C]
-                        transition
-                        ease-in-out
-                        "
-                          value={range}
-                          aria-label="Default select example"
-                          onChange={(e) => handleLocalRange(e)}
-                        >
-                          <option value={0}>Select local range</option>
-                          <option value="1">1 km</option>
-                          <option value="5">5 km</option>
-                          <option value="10">10 km</option>
-                        </select>
-                      </div>
-                      <div className="h-[350px]">
-                        <Map
-                          id="displayMap"
-                          initialViewState={{
-                            longitude: marker.longitude ? marker.longitude : -73.990593,
-                            latitude: marker.latitude? marker.latitude : 40.740121,
-                            zoom: 12
-                          }}
-                          ref={mapRef}
-                          style={{borderRadius: '12px'}}
-                          mapStyle="mapbox://styles/mapbox/streets-v9"
-                          mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-                        >
-                          <NavigationControl/>
-                          {
-                            marker.latitude && marker.longitude &&
-                            <Marker longitude={marker.longitude} latitude={marker.latitude}/>
-                          }
-                          {
-                            layer.latitude && layer.longitude && range > 0 &&
-                            <Source type={'geojson'} data={turf.circle([layer.longitude, layer.latitude], range, {
-                              steps: 50, units: "kilometers"
-                            })}>
-                              <Layer
-                                id="point-90-hi"
-                                type="fill"
-                                paint={{
-                                  "fill-color": "#088",
-                                  "fill-opacity": 0.2,
-                                  "fill-outline-color": "yellow"
-                                }}
-                              />
-                            </Source>
-                          }
-                        </Map>
-                      </div>
-                    </div>
+                    <CreateNFTStep2
+                     address={address}
+                     addressSearchResult={addressSearchResult}
+                     country={country}
+                     handleChangeAddress={handleChangeAddress}
+                     handleClickAddress={handleClickAddress}
+                     handleLocalRange={handleLocalRange}
+                     layer={layer}
+                     mapRef={mapRef}
+                     marker={marker}
+                     range={range} searchAddress={search}
+                     setCountry={setCountry}/>
                   }
                   {
                     step === 2 &&

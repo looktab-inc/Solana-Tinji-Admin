@@ -9,6 +9,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      status: {
+        type: Sequelize.ENUM('none', 'like', 'dislike', 'used'),
+      },
       store_address: {
         type: Sequelize.STRING
       },
@@ -18,11 +21,11 @@ module.exports = {
       nft_address: {
         type: Sequelize.STRING
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE
       }

@@ -80,7 +80,7 @@ export default function StoreSettingEdit() {
               <div className="mb-[20px]">
                 <p className="text-[16px] font-medium">Store Name</p>
                 <input
-                  className="w-[600px] h-[56px] bg-[#1C1C1C] placeholder:text-[#727272] rounded-xl border border-[#343434] py-[16px] px-[24px]"
+                  className="w-[600px] h-[56px]  placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
                   placeholder="Please enter the store name"
                   value={storeName}
                   onChange={(e) => handleStoreName(e)}
@@ -91,13 +91,13 @@ export default function StoreSettingEdit() {
                 <div className="flex justify-between">
                   <input
                     type={'time'}
-                    className="flex-1 h-[56px] bg-[#1C1C1C] rounded-xl border border-[#343434] py-[16px] px-[24px] mr-[12px]"
+                    className="flex-1 h-[56px] rounded-xl borderborder-[#646B7C] bg-[#191A1E] py-[16px] px-[24px] mr-[12px]"
                     value={startTime}
                     onChange={(e) => handleChangeStartTime(e)}
                   />
                   <input
                     type={'time'}
-                    className="flex-1 h-[56px] bg-[#1C1C1C] rounded-xl border border-[#343434] py-[16px] px-[24px]"
+                    className="flex-1 h-[56px]  rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
                     value={endTime}
                     onChange={(e) => handleChangeEndTime(e)}
                   />
@@ -106,7 +106,7 @@ export default function StoreSettingEdit() {
               <div className="mb-[20px]">
                 <p className="text-[16px] font-medium">Location</p>
                 <input
-                  className="w-[600px] h-[56px] bg-[#1C1C1C] placeholder:text-[#727272] rounded-xl border border-[#343434] py-[16px] px-[24px]"
+                  className="w-[600px] h-[56px]  placeholder:text-[#727272] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
                   placeholder="Please enter the store location"
                   value={location}
                   onChange={(e) => handleLocation(e)}
