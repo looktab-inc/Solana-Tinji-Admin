@@ -32,7 +32,7 @@ const handler =
           res.status(500).end()
         }
 
-        const reviews = await db.review.findOne({
+        const reviews = await db.review.findAll({
           where: {
             store_address: {
               [Op.eq]: address,
