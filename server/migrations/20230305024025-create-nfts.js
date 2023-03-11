@@ -1,4 +1,5 @@
 'use strict';
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -9,8 +10,11 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      campaign_id: {
+        type: Sequelize.INTEGER
+      },
       status: {
-        type: Sequelize.ENUM('none', 'like', 'dislike', 'used'),
+        type: Sequelize.STRING
       },
       store_address: {
         type: Sequelize.STRING

@@ -10,7 +10,16 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      this.hasMany(models.campaign_infos, {
+        as: "campaign_infos",
+        foreignKey: "campaign_id",
+        onDelete: "cascade",
+      });
+      this.hasMany(models.nfts, {
+        as: "nfts",
+        foreignKey: "campaign_id",
+        onDelete: "cascade",
+      });
     }
   }
   Campaign.init({
@@ -18,7 +27,10 @@ module.exports = (sequelize, DataTypes) => {
     store_address: DataTypes.STRING,
     description: DataTypes.STRING,
     location: DataTypes.GEOMETRY('POINT'),
+    boundary: DataTypes.GEOMETRY('POLYGON'),
     distance: DataTypes.DOUBLE,
+    display_started_at: DataTypes.DATE,
+    display_ended_at: DataTypes.DATE
   }, {
     sequelize,
     tableName: 'campaigns',

@@ -3,7 +3,6 @@ import db from "../../../../server/models";
 import nextConnect from 'next-connect'
 import {Op} from "sequelize";
 
-
 type Review = {
   store_address: string,
   reviewer_address: string,
@@ -19,7 +18,6 @@ const handler =
     .get(
       async ( req: NextApiRequest, res: NextApiResponse<ReviewList>) => {
         const { address } = req.query
-
         const store = await db.stores.findOne({
           where: {
             address: {
@@ -27,7 +25,6 @@ const handler =
             },
           },
         })
-
         if (!store) {
           res.status(500).end()
         }

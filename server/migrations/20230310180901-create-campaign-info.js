@@ -14,10 +14,13 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       nft_type: {
-        type: Sequelize.ENUM('standard', 'dynamic'),
+        type: Sequelize.STRING,
       },
       discount_type: {
-        type: Sequelize.ENUM('amount', 'rate'),
+        type: Sequelize.STRING,
+      },
+      discount_value: {
+        type: Sequelize.DOUBLE,
       },
       image_url: {
         type: Sequelize.STRING,

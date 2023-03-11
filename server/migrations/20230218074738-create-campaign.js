@@ -21,10 +21,21 @@ module.exports = {
         type: Sequelize.TEXT,
       },
       location: {
-        type: Sequelize.GEOMETRY('POINT')
+        type: Sequelize.GEOMETRY('POINT'),
+        comment: "중심 좌표"
+      },
+      boundary: {
+        type: Sequelize.GEOMETRY('POLYGON'),
+        comment: "중심 좌표 기반 반경"
       },
       distance: {
         type: Sequelize.DOUBLE
+      },
+      display_started_at: {
+        type: Sequelize.DATE
+      },
+      display_ended_at: {
+        type: Sequelize.DATE
       },
       created_at: {
         allowNull: false,

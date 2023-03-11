@@ -23,12 +23,19 @@ export default function StoreSettingEdit() {
   const data = use(dataPromise)
 
   useEffect(() => {
-    setStoreName((data && data.name) || '')
-    setStartTime((data && data.open_time &&  data.open_time.start) || '')
-    setEndTime((data && data.open_time &&  data.open_time.end) || '')
-    setDescription((data && data.description) || '')
-    setLocation((data && data.location_address) || '')
+    setInitialState(data)
+    return () => {
+
+    }
   }, [data])
+
+  const setInitialState = (initialData) => {
+    setStoreName((initialData && initialData.name) || '')
+    setStartTime((initialData && initialData.open_time &&  initialData.open_time.start) || '')
+    setEndTime((initialData && initialData.open_time &&  initialData.open_time.end) || '')
+    setDescription((initialData && initialData.description) || '')
+    setLocation((initialData && initialData.location_address) || '')
+  }
 
 
   const handleClickSave = async () => {

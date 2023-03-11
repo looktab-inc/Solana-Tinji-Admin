@@ -10,12 +10,19 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      this.belongsTo(models.campaigns, {
+        as: "campaigns",
+        foreignKey: "campaign_id",
+        onDelete: "cascade",
+      });
     }
   }
   nfts.init({
+    campaign_id: DataTypes.NUMBER,
+    status: DataTypes.STRING,
     store_address: DataTypes.STRING,
-    nft_address: DataTypes.STRING
+    nft_address: DataTypes.STRING,
+    holder_address: DataTypes.STRING
   }, {
     sequelize,
     tableName: 'nfts',
