@@ -22,7 +22,7 @@ class SolanaHelper{
     this.user = Keypair.fromSecretKey(
       bs58.decode(`${process.env.SECRET_KEY}`),
     );
-    this.publickKey = new PublicKey(`${process.env.PUBLIC_KET}`);
+    this.publickKey = new PublicKey(`${process.env.PUBLIC_KEY}`);
     this.connection = new Connection(clusterApiUrl('devnet'));
     this.metaplex = Metaplex.make(this.connection)
       .use(keypairIdentity(this.user))
