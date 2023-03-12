@@ -8,14 +8,7 @@ import {useRouter} from "next/navigation";
 
 export async function getData() {
   const res = await fetch('http://localhost:3000/api/store',{ cache: 'no-store'})
-  console.log(res.json())
-  //return await res.json()
-  return {
-    name: 'test',
-    open_time: {},
-    location_address: 'test',
-    description: "test"
-  }
+  return await res.json()
 }
 
 const dataPromise = getData()
@@ -40,7 +33,7 @@ export default function StoreSetting() {
         <Lnb/>
         <div className="flex-auto min-h-[791px]">
           <PageHeader pageName={'Store Setting'} withBack={false} backEvent/>
-          <div className={`max-w-[1000px] min-h-[884px] bg-[#23262C] p-[40px] rounded-[24px] m-[48px]`}>
+          <div className={`w-[1000px] min-h-[884px] bg-[#23262C] p-[40px] rounded-[24px] m-[48px]`}>
             <div className="border-[#373A43] border-b pb-[20px] mb-[20px]">
               <p className="text-[16px] font-medium">Store Name</p>
               <p className="text-[18px] font-semibold mt-[12px]">{data.name}</p>

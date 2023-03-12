@@ -30,6 +30,7 @@ export default function StoreSettingEdit() {
   })
   const router = useRouter()
   const data = use(dataPromise)
+  console.log(data)
   const uploadFile = useRef(null)
 
   useEffect(() => {
@@ -42,8 +43,7 @@ export default function StoreSettingEdit() {
     setEndTime((initialData && initialData.open_time &&  initialData.open_time.end) || '')
     setDescription((initialData && initialData.description) || '')
     setLocation((initialData && initialData.location_address) || '')
-    console.log(!!(initialData && initialData.location))
-    if (!!(initialData && initialData.location)) {
+    if (!!(initialData && initialData.location.lat && initialData.location.lng)) {
       setLocationPoint({
         longitude: initialData.location.lng,
         latitude: initialData.location.lat,
@@ -155,7 +155,7 @@ export default function StoreSettingEdit() {
         <Lnb/>
         <div className="flex-auto min-h-[791px]">
           <PageHeader pageName={'Store Setting Edit'} withBack={true} backEvent={handleClickClose}/>
-          <div className={`max-w-[1000px] min-h-[884px] bg-[#23262C] p-[40px] rounded-[24px] m-[48px]`}>
+          <div className={`w-[1000px] min-h-[884px] bg-[#23262C] p-[40px] rounded-[24px] m-[48px]`}>
             <div className="w-[600px]">
               <div className="mb-[20px]">
                 <p className="text-[16px] font-medium mb-[12px]">Store Name</p>

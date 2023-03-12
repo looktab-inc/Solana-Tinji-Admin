@@ -32,7 +32,7 @@ export default function Home() {
       </div>
       <div className="flex flex-col justify-center items-center mt-[232px]">
         <Image
-          src="/images/login/img-frame.svg"
+          src="/images/logo.svg"
           alt="dashboard"
           width={240}
           height={240}

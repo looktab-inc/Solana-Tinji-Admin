@@ -2,7 +2,8 @@
 
 import '../styles/globals.css'
 import AppProvider from "@/context/AppContext";
-import Head from 'next/head';
+import AdminHead from "@/app/head";
+import Head from "next/head";
 
 export default function RootLayout({
   children,
@@ -12,10 +13,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <Head>
-        <title>Tinji Admin</title>
-        <meta content="width=device-width, initial-scale=1" name="viewport" />
-        <meta property="og:title" content="Tinji Admin" key="title" />
-        <meta name="description" content="tinji product" />
+        <link rel="favicon" href="./favicon.ico"/>
       </Head>
       <body className="font-Montserrat h-[100vh] w-full">
         <AppProvider>

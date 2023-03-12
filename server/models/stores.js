@@ -48,11 +48,6 @@ module.exports = (sequelize, DataTypes) => {
           return null
         }
         return JSON.parse(openTime)
-      },
-      set(openTime) {
-        if (openTime) {
-          return this.setDataValue(JSON.stringify(openTime))
-        }
       }
     }
   }, {
