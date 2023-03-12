@@ -3,101 +3,84 @@ import nextConnect from 'next-connect'
 import db, { Sequelize } from "../../../../server/models";
 import {Op} from "sequelize";
 import SolanaHelper from "@/pages/solana_helper";
-import {NFT_STATUS} from "../../../../server/enums/generic_enum";
+import {NFT_STATUS} from "@/pages/enums/generic_enum";
 
-type NFT = {
-  nft_address: string,
-}
-type NFTList = {
-  list : Array<NFT>;
-  count?: number;
+type ReturnResponse = {
   message?: string;
 }
 
 const handler =
   nextConnect()
-    .post(
-      async ( req: NextApiRequest, res: NextApiResponse) => {
-        const {address} = req.query
-        const { lat, lng } = req.body
-        if (!(lat && lng)) {
-          res.status(500).json({
-            message: 'need parameters, lat, lng'
-          });
-        }
+    .patch(async ( req: NextApiRequest, res: NextApiResponse<ReturnResponse>) => {
+      const {address} = req.query
+      const { status, holder_address } = req.body
 
-        // 위치 기반 발급 및 리스트 전달
-        const whereQuery = db.sequelize.fn('ST_Within',
-            db.sequelize.literal(`ST_GeomFromText('POINT(${lng} ${lat})')`),
-            db.sequelize.literal('boundary'));
-        const campaigns = await db.campaigns.findAll({
-          where: {
-            $and: db.sequelize.where(whereQuery, 1),
-            display_started_at: {
-              [Op.lte]: new Date()
-            }
-          },
-          include: [
-            {
-              model: db.nfts,
-              as: "nfts",
-              where: {
-                holder_address: {[Op.eq]: null}
-              }
-            },
-          ]
+      if (!status || !holder_address) {
+        return res.status(500).json({
+          message: '필수 파라미터가 필요합니다.'
         })
+      }
 
-        await transfer(campaigns, address as string).then(result => {
-          res.status(200).json(result)
-        }).catch(e => {
+      const nft = await db.nfts.findOne({
+        where: {
+          nft_address: {
+            [Op.eq]: address,
+          },
+          status: {
+            [Op.eq]: NFT_STATUS.NONE,
+          },
+          holder_address: {
+            [Op.eq]: holder_address,
+          }
+        },
+      })
+
+      if (!nft) {
+        return res.status(500).json({
+          message: '존재하지 않는 nft 입니다.'
+        })
+      }
+
+      const campaign = await db.campaigns.findOne({
+        where: {
+          id: {
+            [Op.eq]: nft.campaign_id,
+          },
+        },
+        include: [
+          {
+            model: db.campaign_infos,
+            as: "campaign_infos",
+          },
+        ],
+      })
+
+      const solanaHelper = new SolanaHelper()
+      const nftByWeb3 = await solanaHelper.findNft(address)
+      const {name, description, image, attributes} = nftByWeb3.json
+      attributes.map(attribute => {
+        if (attribute.trait_type === 'status') {
+          attribute.value = status
+        }
+      })
+      const uri = await solanaHelper.getOriginalUri(campaign.description, image, attributes)
+      await solanaHelper.updateNft(campaign.title, uri, address as string)
+        .then(async _ => {
+          const response = await db.nfts.update(
+            {
+              status: status
+            },
+            {where: {id: nft.id}}
+          )
+          res.status(200).json({})
+        }).catch(_ => {
           res.status(500).json({
-            message: "can't transfer!"
+            message: '실패.'
           })
         })
-      })
+
+      return res.status(200).json({})
+    })
 
 
 export default handler
-
-const transfer = async (campaigns: any, transferAddress: string) => {
-  return new Promise<NFTList>(async (resolve, reject) => {
-    const solanaHelper = new SolanaHelper()
-    const transferNft: Array<NFT> = [];
-    try {
-      await Promise.all(campaigns.map(async campaign => {
-        if (campaign.nfts.length > 0) {
-          const mintNft = campaign.nfts[0]
-          const mintAddress = mintNft.nft_address
-          await solanaHelper.transfer(mintAddress, transferAddress)
-            .then(async result => {
-              if (result) {
-                await db.nfts.update(
-                  {
-                    holder_address: transferAddress,
-                    status: NFT_STATUS.NONE
-                  },
-                  {where: {id: mintNft.id}}
-                )
-                transferNft.push({
-                  nft_address: mintAddress
-                })
-              }
-            })
-        }
-      })).then(_ => {
-        return resolve({
-          list: transferNft,
-          count: transferNft.length
-        })
-      })
-    } catch (e) {
-      return reject(e)
-    }
-  })
-}
-
-
-
-
-

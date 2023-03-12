@@ -20,6 +20,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "campaign_id",
         onDelete: "cascade",
       });
+      this.hasMany(models.nfts, {
+        as: "hasNfts",
+        foreignKey: "campaign_id",
+        onDelete: "cascade",
+      });
     }
   }
   Campaign.init({

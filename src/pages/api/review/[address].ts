@@ -26,7 +26,7 @@ const handler =
           },
         })
         if (!store) {
-          res.status(500).end()
+          return res.status(500).end()
         }
 
         const reviews = await db.review.findAll({
@@ -43,7 +43,7 @@ const handler =
             comment: review.comment
           }
         })
-        res.status(200).json({
+        return res.status(200).json({
           list : reviewList
         })
       })

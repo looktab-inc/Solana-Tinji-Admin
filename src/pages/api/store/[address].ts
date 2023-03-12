@@ -29,7 +29,7 @@ const handler =
           },
         })
         if (store) {
-          res.status(200).json({
+          return res.status(200).json({
             name: store.name,
             address: store.address,
             description: store.description,
@@ -38,7 +38,7 @@ const handler =
             open_time: JSON.parse(store.open_time)
           });
         } else {
-          res.status(500).end()
+          return res.status(500).end()
         }
       })
 

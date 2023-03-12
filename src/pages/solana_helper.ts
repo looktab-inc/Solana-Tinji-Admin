@@ -51,6 +51,32 @@ class SolanaHelper{
     return nft;
   }
 
+  async updateNft(tokenName: string, uri: string, mintAddress: string) {
+    const mintAddressPublicKey = new PublicKey(mintAddress)
+    // get "NftWithToken" type from mint address
+    const nft = await this.metaplex.nfts().findByMint({ mintAddress: mintAddressPublicKey});
+
+    // omit any fields to keep unchanged
+    return await this.metaplex.nfts().update({
+      nftOrSft: nft,
+      name: tokenName, //각 토큰 이름은 이걸로 형성됨
+      symbol: symbol,
+      uri: uri,
+      sellerFeeBasisPoints: sellerFeeBasisPoints,
+    }).then(_ => {
+      console.log(`Token Mint: https://explorer.solana.com/address/${nft.address.toString()}?cluster=devnet`);
+      return true
+    }).then(_ => {
+      return false
+    })
+  }
+
+  async findNft (mintAddress) {
+    const mintAddressPublicKey = new PublicKey(mintAddress)
+    const nft = await this.metaplex.nfts().findByMint({ mintAddress: mintAddressPublicKey});
+    return nft
+  }
+
   async getOriginalUri(description: string,  imageUri: string, attributes: any) {
     const { uri } = await this.metaplex.nfts().uploadMetadata({
       name: "Tinji coupons", //콜렉션 이름은 이걸로 형성됨

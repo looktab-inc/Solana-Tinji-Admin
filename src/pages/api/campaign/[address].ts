@@ -4,7 +4,7 @@ import db from "../../../../server/models";
 const logger = require('tracer').console();
 const { Op } = require("sequelize");
 import SolanaHelper from "@/pages/solana_helper";
-import {NFT_STATUS} from "../../../../server/enums/generic_enum";
+import {NFT_STATUS} from "@/pages/enums/generic_enum";
 
 type Data = {
   address: any
@@ -100,7 +100,7 @@ const handler =
     })
     .post(async ( req: NextApiRequest, res: NextApiResponse<void>) => {
       const {address} = req.query
-      const { title, description, lat, lng, distance, campaign_settings} = req.body
+      const { title, description, lat, lng, distance, display_started_at, display_ended_at, campaign_settings} = req.body
 
       const transaction = await db.sequelize.transaction()
       const centerLocation = { type: 'Point', coordinates: [lng, lat]}
@@ -124,7 +124,9 @@ const handler =
           description: description,
           distance: distance,
           location: centerLocation,
-          boundary: boundary
+          boundary: boundary,
+          display_started_at: display_started_at,
+          display_ended_at: display_ended_at
         })
 
         // TODO 다이나믹 nft 날짜 조정
@@ -158,7 +160,7 @@ const handler =
       } catch (e) {
         await transaction.rollback()
         logger.error(e.message)
-        res.status(500).end()
+        return res.status(500).end()
       }
     })
 export default handler
