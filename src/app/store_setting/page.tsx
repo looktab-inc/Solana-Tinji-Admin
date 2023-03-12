@@ -6,7 +6,7 @@ import {PageHeader} from "@/components/PageHeader";
 import {getAMPMTime} from "@/util/dateUtil";
 import {useRouter} from "next/navigation";
 
-export async function getData() {
+async function getData() {
   const res = await fetch('http://localhost:3000/api/store',{ cache: 'no-store'})
   return await res.json()
 }

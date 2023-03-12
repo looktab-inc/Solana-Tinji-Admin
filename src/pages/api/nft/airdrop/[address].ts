@@ -2,8 +2,8 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import nextConnect from 'next-connect'
 import db, { Sequelize } from "../../../../../server/models";
 import {Op} from "sequelize";
-import SolanaHelper from "@/pages/solana_helper";
-import {NFT_STATUS} from "@/pages/enums/generic_enum";
+import SolanaHelper from "@/util/solana_helper";
+import {NFT_STATUS} from "@/util/enums/generic_enum";
 
 type NFT = {
   nft_address: string,

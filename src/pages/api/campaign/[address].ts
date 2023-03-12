@@ -3,8 +3,8 @@ import nextConnect from 'next-connect'
 import db from "../../../../server/models";
 const logger = require('tracer').console();
 const { Op } = require("sequelize");
-import SolanaHelper from "@/pages/solana_helper";
-import {DISCOUNT_TYPE, NFT_STATUS, NFT_TYPE} from "@/pages/enums/generic_enum";
+import SolanaHelper from "@/util/solana_helper";
+import {DISCOUNT_TYPE, NFT_STATUS, NFT_TYPE} from "@/util/enums/generic_enum";
 
 type Data = {
   address: any

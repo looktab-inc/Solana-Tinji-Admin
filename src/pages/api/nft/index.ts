@@ -2,9 +2,9 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import nextConnect from 'next-connect'
 import db, { Sequelize } from "../../../../server/models";
 import {Op} from "sequelize";
-import SolanaHelper from "@/pages/solana_helper";
-import {NFT_STATUS, NFT_TYPE} from "@/pages/enums/generic_enum";
+import SolanaHelper from "@/util/solana_helper";
 import moment from "moment";
+import {NFT_TYPE} from "@/util/enums/generic_enum";
 
 const handler =
   nextConnect()

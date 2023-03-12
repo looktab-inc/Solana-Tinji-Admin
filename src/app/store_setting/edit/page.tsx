@@ -8,7 +8,7 @@ import {useRouter} from "next/navigation";
 import SearchIcon from "@mui/icons-material/Search";
 import CustomSelect from "@/components/CustomSelect";
 
-export async function getData() {
+async function getData() {
   const res = await fetch('/api/store',{ cache: 'no-store'})
   return await res.json()
 }
