@@ -19,6 +19,16 @@ module.exports = (sequelize, DataTypes) => {
     description: DataTypes.STRING,
     location_address: DataTypes.STRING,
     cover_url: DataTypes.STRING,
+    location: {
+      type: DataTypes.GEOMETRY('POINT'),
+      get() {
+        const point = this.getDataValue("location")['coordinates']
+        return {
+          lng: point[0],
+          lat : point[1]
+        }
+      }
+    },
     open_time: {
       type: DataTypes.JSON,
       get() {

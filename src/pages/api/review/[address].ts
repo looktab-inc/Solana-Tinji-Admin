@@ -7,6 +7,7 @@ type Review = {
   store_address: string,
   reviewer_address: string,
   comment: string,
+  payment_amount: number,
 }
 type ReviewList = {
   list : Array<Review>,
@@ -40,7 +41,8 @@ const handler =
           return {
             reviewer_address: review.reviewer_address,
             store_address: review.store_address,
-            comment: review.comment
+            comment: review.comment,
+            payment_amount: review.payment_amount
           }
         })
         return res.status(200).json({

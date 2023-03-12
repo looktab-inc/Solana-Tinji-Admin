@@ -10,10 +10,6 @@ type Data = {
 
 const handler =
   nextConnect()
-    .get(async ( req: NextApiRequest, res: NextApiResponse) => {
-      logger.info(db)
-      logger.info(db.store)
-    })
     .post(
       async ( req: NextApiRequest, res: NextApiResponse) => {
         // 디비에서 정보 가져오기

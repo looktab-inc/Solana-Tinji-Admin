@@ -150,7 +150,8 @@ const handler =
           title,
           description,
           campaignSettingsDto[0],
-          address as string
+          address as string,
+          store.location
         ).then(async _ => {
           await transaction.commit()
           res.status(200).json()
@@ -165,17 +166,30 @@ const handler =
     })
 export default handler
 
-const createNFT = async (campaignId: number, title: string, description: string, campaignSetting: any, address: string) => {
+const createNFT = async (
+  campaignId: number,
+  title: string,
+  description: string,
+  campaignSetting: any,
+  address: string,
+  location: {
+    lat: number,
+    lng: number
+  }
+) => {
   const solanaHelper = new SolanaHelper()
   return new Promise<boolean>(async (resolve, reject) => {
     try {
       const attributes = [
         { trait_type: 'store_address', value: address },
+        { trait_type: 'store_location_lat', value: location.lat },
+        { trait_type: 'store_location_lng', value: location.lng },
         { trait_type: 'status', value: 'none' },
         { trait_type: 'started_at', value: campaignSetting.display_started_at },
         { trait_type: 'ended_at', value: campaignSetting.display_ended_at },
-        { trait_type: 'discountRate', value: campaignSetting.discount_type === 'rate'?  campaignSetting.discount_value : 0},
-        { trait_type: 'discountAmount', value: campaignSetting.discount_type === 'amount'?  campaignSetting.discount_value : 0},
+        { trait_type: 'discount_type', value: campaignSetting.discount_type },
+        { trait_type: 'discount_rate', value: campaignSetting.discount_type === 'rate'?  campaignSetting.discount_value : 0},
+        { trait_type: 'discount_amount', value: campaignSetting.discount_type === 'amount'?  campaignSetting.discount_value : 0},
       ]
       const uri = await solanaHelper.getOriginalUri(description, campaignSetting.image_url, attributes)
       for (let i = 0; i < 2; i++) {

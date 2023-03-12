@@ -8,12 +8,13 @@ type Data = {
 }
 
 type GetDetail = {
-  name: string,
-  address: string,
-  description: string,
-  location_address: string,
-  cover_url: string,
-  open_time: any
+  name: string;
+  address: string;
+  description: string;
+  location_address: string;
+  cover_url: string;
+  open_time: any;
+  location: any;
 }
 
 const handler =
@@ -35,7 +36,8 @@ const handler =
             description: store.description,
             location_address: store.location_address,
             cover_url: store.cover_url,
-            open_time: JSON.parse(store.open_time)
+            open_time: JSON.parse(store.open_time),
+            location: store.location ? store.location : {lat : 0, lng: 0}
           });
         } else {
           return res.status(500).end()

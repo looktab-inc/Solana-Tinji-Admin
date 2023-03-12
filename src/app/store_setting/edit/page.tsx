@@ -5,6 +5,8 @@ import {Lnb} from "@/components/lnb";
 import {PageHeader} from "@/components/PageHeader";
 import axios from "axios";
 import {useRouter} from "next/navigation";
+import SearchIcon from "@mui/icons-material/Search";
+import CustomSelect from "@/components/CustomSelect";
 
 export async function getData() {
   const res = await fetch('/api/store',{ cache: 'no-store'})
@@ -21,6 +23,11 @@ export default function StoreSettingEdit() {
   const [location, setLocation] = useState('')
   const [image, setImage] = useState('')
   const [imageName, setImageName] = useState('Upload Store img')
+  const [addressSearchResult, setAddressSearchResult] = useState([])
+  const [locationPoint, setLocationPoint] = useState({
+    longitude: 0,
+    latitude: 0,
+  })
   const router = useRouter()
   const data = use(dataPromise)
   const uploadFile = useRef(null)
@@ -46,7 +53,9 @@ export default function StoreSettingEdit() {
       open_time: {
         start: startTime,
         end: endTime
-      }
+      },
+      lat: locationPoint.latitude,
+      lng: locationPoint.longitude
     }
     await axios.post('/api/store', params)
       .then(_ => {router.push(`/store_setting`)})
@@ -83,6 +92,24 @@ export default function StoreSettingEdit() {
     uploadFile.current.click()
   }
 
+  const searchAddress = async (e) => {
+    if ((e.type === "keydown" && e.code === 'Enter') || e.type === "click") {
+      await axios.get(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(location)}.json?proximity=ip&access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`)
+        .then(response => {
+          const {features} = response.data
+          const searchResult = features.map(feature => {
+            return {
+              center: feature.center,
+              title: feature.text,
+              address: feature.place_name
+            }
+          })
+          setAddressSearchResult(searchResult)
+        })
+    }
+  }
+
   const onChangeUploadImage = async (e) => {
     if (!e.target.files) {
       return;
@@ -99,6 +126,15 @@ export default function StoreSettingEdit() {
       setImageName(file.name)
       setImage(image)
     })
+  }
+
+  const handleClickAddress = (address) => {
+    setLocationPoint({
+      longitude: address.center[0],
+      latitude: address.center[1],
+    })
+    setLocation(address.address)
+    setAddressSearchResult([])
   }
 
   return (
@@ -137,12 +173,21 @@ export default function StoreSettingEdit() {
               </div>
               <div className="mb-[20px]">
                 <p className="text-[16px] font-medium mb-[12px]">Location</p>
-                <input
-                  className="w-[600px] h-[56px]  placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
-                  placeholder="Please enter the store location"
-                  value={location}
-                  onChange={(e) => handleLocation(e)}
-                />
+                <div className="flex w-[600px] h-[56px] placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]">
+                  <input
+                    className="w-full placeholder:text-[#646B7C] bg-[#191A1E]"
+                    style={{outline: 'none', border: 'none'}}
+                    placeholder="Please enter your address"
+                    value={location}
+                    onChange={handleLocation}
+                    onKeyDown={searchAddress}
+                  />
+                  <SearchIcon onClick={searchAddress}/>
+                </div>
+                {
+                  addressSearchResult.length > 0 &&
+                  <CustomSelect addressList={addressSearchResult} onClick={handleClickAddress}/>
+                }
               </div>
               <div className="mb-[20px]">
                 <p className="text-[16px] font-medium mb-[12px]">Store description</p>

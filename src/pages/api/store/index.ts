@@ -14,7 +14,8 @@ type GetData = {
   address: string,
   description: string,
   location_address: string,
-  open_time: any
+  open_time: any;
+  location: any;
 }
 
 const handler =
@@ -35,23 +36,27 @@ const handler =
           address: store.address,
           description: store.description,
           location_address: store.location_address,
-          open_time: JSON.parse(store.open_time)
+          open_time: JSON.parse(store.open_time),
+          location: store.location.toString()
         });
       } else {
         res.status(500).end()
       }
     })
     .post(async ( req: NextApiRequest, res: NextApiResponse<void>) => {
-      const {name, description, location_address, open_time, cover_url} = req.body
+      const {name, description, location_address, open_time, cover_url, lng, lat} = req.body
       const cookies = parse(req.headers.cookie || '')
       const address = cookies.address
+      const location = { type: 'Point', coordinates: [lng, lat]}
+
       await db.stores.update(
         {
           name: name,
           description: description,
           location_address: location_address,
           open_time: open_time,
-          cover_url: cover_url
+          cover_url: cover_url,
+          location: location
         },
         {where: {address: address}}
       ).then(_ => {

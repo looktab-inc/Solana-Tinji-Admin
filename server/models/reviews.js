@@ -16,7 +16,8 @@ module.exports = (sequelize, DataTypes) => {
   reviews.init({
     store_address: DataTypes.STRING,
     reviewer_address: DataTypes.STRING,
-    comment: DataTypes.STRING
+    comment: DataTypes.STRING,
+    payment_amount: DataTypes.NUMBER
   }, {
     sequelize,
     tableName: 'reviews',

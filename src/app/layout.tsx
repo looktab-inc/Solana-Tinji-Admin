@@ -12,10 +12,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <Head>
-        <title>Tinji</title>
+        <title>Tinji Admin</title>
         <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <meta property="og:title" content="Tinji Admin" key="title" />
         <meta name="description" content="tinji product" />
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <body className="font-Montserrat h-[100vh] w-full">
         <AppProvider>
