@@ -51,11 +51,7 @@ class SolanaHelper{
     return nft;
   }
 
-  async updateNft(tokenName: string, uri: string, mintAddress: string) {
-    const mintAddressPublicKey = new PublicKey(mintAddress)
-    // get "NftWithToken" type from mint address
-    const nft = await this.metaplex.nfts().findByMint({ mintAddress: mintAddressPublicKey});
-
+  async updateNft(tokenName: string, uri: string, nft: any) {
     // omit any fields to keep unchanged
     return await this.metaplex.nfts().update({
       nftOrSft: nft,

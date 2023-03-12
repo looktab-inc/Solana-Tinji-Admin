@@ -2,6 +2,7 @@ import React, {FC, useContext, useRef, useState} from "react";
 import axios from "axios";
 import {AppContext} from "@/context/AppContext";
 import CustomRadio from "@/components/CustomRadio";
+import Spinner from "@/components/spinner";
 
 export interface Props {
   eventDays: number;
@@ -79,9 +80,9 @@ const DynamicNFTItem: FC<ItemProps> = ({
   changeDays
 }) => {
   const uploadFile = useRef(null)
-
+  const [loading, setLoading] = useState(false)
   const handleClickUploadImage = (e) => {
-    if (!uploadFile) {
+    if (!uploadFile || loading) {
       return
     }
     uploadFile.current.click()
@@ -94,15 +95,19 @@ const DynamicNFTItem: FC<ItemProps> = ({
     const file = e.target.files[0]
     const formData = new FormData();
     formData.append('image', file)
-    await axios.post('/api/upload/image', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      }
-    }).then( response => {
-      const {image} = response.data
-      changeDynamicNFT(dynamicNFT.id, 'image_name', file.name)
-      changeDynamicNFT(dynamicNFT.id, 'image_url', image)
-    })
+    if (!loading) {
+      setLoading(true)
+      await axios.post('/api/upload/image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        }
+      }).then( response => {
+        setLoading(false)
+        const {image} = response.data
+        changeDynamicNFT(dynamicNFT.id, 'image_name', file.name)
+        changeDynamicNFT(dynamicNFT.id, 'image_url', image)
+      })
+    }
   }
 
   const changeDiscountType = (discountType) => {
@@ -176,7 +181,7 @@ const DynamicNFTItem: FC<ItemProps> = ({
           <button
             onClick={handleClickUploadImage}
             className="w-[120px] h-[56px] text-[20px] font-bold rounded-[12px] outline outline-[#646B7C] ml-[12px]">
-            Upload
+            {loading ? <Spinner/> : `Upload`}
           </button>
           <input
             id="uploadFile"

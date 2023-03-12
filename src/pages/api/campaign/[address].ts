@@ -130,8 +130,9 @@ const handler =
           display_ended_at: display_ended_at
         })
 
-        // TODO 다이나믹 nft 날짜 조정
+        console.log(campaign_settings)
         const campaignSettingsDto = getCampaignSettingsDto(nft_type, campaign_settings, campaign)
+        console.log(campaignSettingsDto)
 
         // 캠페인 정보 업데이트
         await db.campaign_infos.bulkCreate(campaignSettingsDto)
@@ -179,8 +180,8 @@ const createNFT = async (
         { trait_type: 'started_at', value: campaignSetting.display_started_at },
         { trait_type: 'ended_at', value: campaignSetting.display_ended_at },
         { trait_type: 'discount_type', value: campaignSetting.discount_type },
-        { trait_type: 'discount_rate', value: campaignSetting.discount_type === 'rate'?  campaignSetting.discount_value : 0},
-        { trait_type: 'discount_amount', value: campaignSetting.discount_type === 'amount'?  campaignSetting.discount_value : 0},
+        { trait_type: 'discount_rate', value: campaignSetting.discount_type === 'rate'?  campaignSetting.discount_rate : 0},
+        { trait_type: 'discount_amount', value: campaignSetting.discount_type === 'amount'?  campaignSetting.discount_amount : 0},
       ]
       const uri = await solanaHelper.getOriginalUri(description, campaignSetting.image_url, attributes)
       for (let i = 0; i < 2; i++) {
@@ -218,20 +219,23 @@ const makePolygon = (lat: number, lng: number, distance: number) => {
 const getCampaignSettingsDto = (nftType: string, campaign_settings: any, campaign: any) => {
   if (nftType === NFT_TYPE.STANDARD) {
     return campaign_settings.map(campaign_setting => {
+      console.log(campaign_setting)
       return {
         campaign_id: campaign.id,
         nft_type: campaign_setting.nft_type,
         discount_type: campaign_setting.discount_type,
-        discount_value:  campaign_setting.discount_value,
+        discount_amount: campaign_setting.discount_amount,
+        discount_rate: campaign_setting.discount_rate,
         image_url: campaign_setting.image_url,
-        display_started_at: campaign_setting.display_started_at,
-        display_ended_at: campaign_setting.display_ended_at,
+        display_started_at: campaign.display_started_at,
+        display_ended_at: campaign.display_ended_at,
+        completed_at: new Date()
       }
     })
   } else {
     let initialStartDate = new Date(campaign.display_started_at)
     let initialEndDate = null
-    return campaign_settings.map(campaign_setting => {
+    return campaign_settings.map((campaign_setting, index) => {
       let startDate = new Date()
       let endDate = new Date()
       if (!initialEndDate) {
@@ -248,11 +252,12 @@ const getCampaignSettingsDto = (nftType: string, campaign_settings: any, campaig
         campaign_id: campaign.id,
         nft_type: campaign_setting.nft_type,
         discount_type: campaign_setting.discount_type,
-        discount_value:  campaign_setting.discount_type === DISCOUNT_TYPE.AMOUNT
-          ? campaign_setting.discount_amount: campaign_setting.discount_rate,
+        discount_amount: campaign_setting.discount_amount,
+        discount_rate: campaign_setting.discount_rate,
         image_url: campaign_setting.image_url,
         display_started_at: startDate,
         display_ended_at: endDate,
+        completed_at: index === 0 ? new Date() : null
       }
     })
   }

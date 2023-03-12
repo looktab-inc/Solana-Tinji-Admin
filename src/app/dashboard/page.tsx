@@ -13,10 +13,9 @@ import {dateFormatWithDot} from "@/util/dateUtil";
 async function getCapaigns() {
   const address = Cookies.get('address')
   const response = await fetch(`/api/campaign/${address}`, {
-    method: "GET",
     cache: 'no-store',
     headers: {
-      'Content-Type': 'multipart/form-data',
+      'Content-Type': 'application/json',
     }
   })
   const campaigns =  await response.json()

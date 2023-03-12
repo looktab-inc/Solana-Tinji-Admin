@@ -22,6 +22,8 @@ module.exports = (sequelize, DataTypes) => {
     nft_type: DataTypes.STRING,
     discount_type: DataTypes.STRING,
     discount_value: DataTypes.NUMBER,
+    discount_rate: DataTypes.NUMBER,
+    discount_amount: DataTypes.NUMBER,
     image_url: DataTypes.STRING,
     display_started_at: DataTypes.DATE,
     display_ended_at: DataTypes.DATE,

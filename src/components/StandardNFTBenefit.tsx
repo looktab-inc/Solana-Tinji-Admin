@@ -3,6 +3,7 @@ import Image from "next/image"
 import axios from "axios"
 import {AppContext} from "@/context/AppContext"
 import CustomRadio from "@/components/CustomRadio"
+import Spinner from "@/components/spinner";
 
 export const StandardNFTBenefit: FC = ({}) => {
   const { createNFTs, changeCreateNFT } = useContext(AppContext);
@@ -17,6 +18,7 @@ export const StandardNFTBenefit: FC = ({}) => {
     display_started_at: '',
     display_ended_at: '',
   })
+  const [loading, setLoading] = useState(false)
 
   const uploadFile = useRef(null)
 
@@ -28,7 +30,7 @@ export const StandardNFTBenefit: FC = ({}) => {
   })
 
   const handleClickUploadImage = (e) => {
-    if (!uploadFile) {
+    if (!uploadFile || loading) {
       return
     }
     uploadFile.current.click()
@@ -41,15 +43,19 @@ export const StandardNFTBenefit: FC = ({}) => {
     const file = e.target.files[0]
     const formData = new FormData();
     formData.append('image', file)
-    await axios.post('/api/upload/image', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      }
-    }).then( response => {
-      const {image} = response.data
-      changeCreateNFT(standardNFT.id, 'image_url', `${image}`)
-      changeCreateNFT(standardNFT.id, 'image_name', file.name)
-    })
+    if (!loading) {
+      setLoading(true)
+      await axios.post('/api/upload/image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        }
+      }).then( response => {
+        const {image} = response.data
+        setLoading(false)
+        changeCreateNFT(standardNFT.id, 'image_url', `${image}`)
+        changeCreateNFT(standardNFT.id, 'image_name', file.name)
+      })
+    }
   }
 
   const changeDiscountType = (discountType) => {
@@ -111,7 +117,7 @@ export const StandardNFTBenefit: FC = ({}) => {
           <button
             onClick={handleClickUploadImage}
             className="w-[120px] h-[56px] text-[20px] font-bold rounded-[12px] outline outline-[#646B7C] ml-[12px]">
-            Upload
+            {loading ? <Spinner/> : `Upload`}
           </button>
           <input
             id="uploadFile"

@@ -39,7 +39,7 @@ export const PageHeader: FC<Props> = ({
               ADDRESS.substr(ADDRESS.length - 4, ADDRESS.length)}
           </div>
           <Image
-            src="/images/mo.jpeg"
+            src="/images/mo.png"
             alt="arrow"
             width={40}
             height={40}

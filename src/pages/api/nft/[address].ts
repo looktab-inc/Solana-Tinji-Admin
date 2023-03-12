@@ -72,15 +72,12 @@ const handler =
             },
             {where: {id: nft.id}}
           )
-          res.status(200).json({})
+          return res.status(200).json({})
         }).catch(_ => {
-          res.status(500).json({
+          return res.status(500).json({
             message: '실패.'
           })
         })
-
-      return res.status(200).json({})
     })
-
 
 export default handler

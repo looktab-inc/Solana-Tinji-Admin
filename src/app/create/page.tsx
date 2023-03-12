@@ -15,6 +15,7 @@ import CreateNFTStep1 from "@/components/CreateNFTStep1";
 import CreateNFTStep2 from "@/components/CreateNFTStep2";
 import CreateNFTStep3 from "@/components/CreateNFTStep3";
 import {CountryCodes} from "@/util/IOSCounryCode";
+import Spinner from "@/components/spinner";
 
 export default function CreateNFT() {
   const { setDefaultNFTs } = useContext(AppContext)
@@ -48,6 +49,7 @@ export default function CreateNFT() {
     longitude: 0,
     latitude: 0,
   })
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     setDefaultNFTs()
@@ -62,7 +64,7 @@ export default function CreateNFT() {
     setCompleteStep({
       step1: title.length > 0 && description.length > 0,
       step2: !!(marker.latitude && marker.longitude && range > 0),
-      step3: !!(startDate && endDate && nftType && checkImage())
+      step3: !!(startDate && endDate && nftType)
     })
     console.log(completeStep)
   }
@@ -120,7 +122,8 @@ export default function CreateNFT() {
   const handleClickPayment = async () => {
     const address = Cookies.get('address')
     changeCompleteStatus()
-    if (completeStep.step1 && completeStep.step2 && completeStep.step3) {
+    if (completeStep.step1 && completeStep.step2 && completeStep.step3 && !loading && checkImage()) {
+      setLoading(true)
       let campaignSettings = []
       createNFTs.filter(createNFT => {
         return createNFT.nft_type === nftType
@@ -129,8 +132,6 @@ export default function CreateNFT() {
           createNFT.display_started_at = startDate.toISOString()
           createNFT.display_ended_at = endDate.toISOString()
         }
-        createNFT.dicount_value = createNFT.discountType === 'rate' ?
-          createNFT.discountRate : createNFT.discountAmount
         campaignSettings.push(createNFT)
       })
 
@@ -145,10 +146,10 @@ export default function CreateNFT() {
         nft_type : nftType,
         campaign_settings : campaignSettings,
       }
-      console.log(params)
       await axios.post(`/api/campaign/${address}`, params)
         .then(_ => {
-        setStep(3)
+          setStep(3)
+          setLoading(false)
       })
     }
   }
@@ -331,7 +332,7 @@ export default function CreateNFT() {
                     <button
                       onClick={handleClickPayment}
                       className="justify-center items-center w-[120px] h-[56px] text-[20px] font-bold bg-gradient-to-r from-[#BA70FF] via-[#2E80FF] to-[#45F3FF] rounded-[12px]">
-                      Payment
+                      {loading ? <Spinner/> : `Payment`}
                     </button>
                   }
                   {
