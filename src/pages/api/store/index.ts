@@ -37,7 +37,7 @@ const handler =
           description: store.description,
           location_address: store.location_address,
           open_time: JSON.parse(store.open_time),
-          location: store.location.toString()
+          location: store.location ? store.location : {lat : 0, lng: 0}
         });
       } else {
         res.status(500).end()
@@ -54,7 +54,7 @@ const handler =
           name: name,
           description: description,
           location_address: location_address,
-          open_time: open_time,
+          open_time: JSON.stringify(open_time),
           cover_url: cover_url,
           location: location
         },

@@ -36,7 +36,7 @@ const handler =
             description: store.description,
             location_address: store.location_address,
             cover_url: store.cover_url,
-            open_time: JSON.parse(store.open_time),
+            open_time: (store.open_time),
             location: store.location ? store.location : {lat : 0, lng: 0}
           });
         } else {

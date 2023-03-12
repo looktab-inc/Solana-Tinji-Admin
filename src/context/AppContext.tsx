@@ -40,41 +40,40 @@ export const AppProvider = (props: AppProps) => {
 
     defaultNFTs.push({
       id: 0,
-      nftType: 'standard',
-      discountType: 'amount',
-      discountAmount: 0,
-      discountRate: 0,
-      imageUrl: '',
-      imageName:' Upload NFT img',
+      nft_type: 'standard',
+      discount_type: 'amount',
+      discount_amount: 0,
+      discount_rate: 0,
+      image_url: '',
+      image_name: 'Upload NFT img',
       display_started_at: '',
       display_ended_at: '',
     })
     defaultNFTs.push({
       id: 1,
       days: 0,
-      nftType: 'dynamic',
-      discountType: 'amount',
-      discountAmount: 0,
-      discountRate: 0,
-      imageUrl: '',
-      imageName:' Upload NFT img',
+      nft_type: 'dynamic',
+      discount_type: 'amount',
+      discount_amount: 0,
+      discount_rate: 0,
+      image_url: '',
+      image_name:'Upload NFT img',
       display_started_at: '',
       display_ended_at: '',
     })
     defaultNFTs.push({
       id: 2,
       days: 0,
-      nftType: 'dynamic',
-      discountType: 'amount',
-      discountAmount: 0,
-      discountRate: 0,
-      imageUrl: '',
-      imageName:' Upload NFT img',
+      nft_type: 'dynamic',
+      discount_type: 'amount',
+      discount_amount: 0,
+      discount_rate: 0,
+      image_url: '',
+      image_name: 'Upload NFT img',
       display_started_at: '',
       display_ended_at: '',
     })
     setCreateNFTs(defaultNFTs)
-    console.log(createNFTs)
   };
 
   const resetCreateNFTs = () => {

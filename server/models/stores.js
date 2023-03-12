@@ -10,7 +10,11 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      this.hasMany(models.payments, {
+        as: "payments",
+        foreignKey: "store_address",
+        onDelete: "cascade",
+      });
     }
   }
   Stores.init({
@@ -22,20 +26,33 @@ module.exports = (sequelize, DataTypes) => {
     location: {
       type: DataTypes.GEOMETRY('POINT'),
       get() {
-        const point = this.getDataValue("location")['coordinates']
+        const point =  this.getDataValue("location")
+        if (!point) {
+          return {
+            lng: 0,
+            lat : 0
+          }
+        }
+        const coordinates = point['coordinates']
         return {
-          lng: point[0],
-          lat : point[1]
+          lng: coordinates[0],
+          lat : coordinates[1]
         }
       }
     },
     open_time: {
       type: DataTypes.JSON,
       get() {
-        return JSON.parse(this.getDataValue("open_time"));
+        const openTime =  this.getDataValue("open_time")
+        if (!openTime) {
+          return null
+        }
+        return JSON.parse(openTime)
       },
-      set(value) {
-        return this.setDataValue("open_time", JSON.stringify(value));
+      set(openTime) {
+        if (openTime) {
+          return this.setDataValue(JSON.stringify(openTime))
+        }
       }
     }
   }, {

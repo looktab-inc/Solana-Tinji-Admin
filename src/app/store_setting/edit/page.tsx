@@ -42,6 +42,18 @@ export default function StoreSettingEdit() {
     setEndTime((initialData && initialData.open_time &&  initialData.open_time.end) || '')
     setDescription((initialData && initialData.description) || '')
     setLocation((initialData && initialData.location_address) || '')
+    console.log(!!(initialData && initialData.location))
+    if (!!(initialData && initialData.location)) {
+      setLocationPoint({
+        longitude: initialData.location.lng,
+        latitude: initialData.location.lat,
+      })
+    } else {
+      setLocationPoint({
+        longitude: 0,
+        latitude: 0,
+      })
+    }
   }
 
   const handleClickSave = async () => {

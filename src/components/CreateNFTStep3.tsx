@@ -4,6 +4,8 @@ import Image from "next/image";
 import {StandardNFTBenefit} from "@/components/StandardNFTBenefit";
 import DatePicker from "react-datepicker";
 import {DynamicNFTBenefit} from "@/components/DynamicNFTBenefit";
+import { registerLocale, setDefaultLocale } from  "react-datepicker";
+import es from 'date-fns/locale/es';
 
 export interface Props {
   startDate: Date;
@@ -17,22 +19,7 @@ export interface Props {
 
 const CreateNFTStep3 = React.forwardRef<HTMLElement, Props>(
   ({ startDate, endDate, changeStartDate, changeEndDate, NFTType, changeNFTType, eventDays, ...props }, ref) => {
-
-    const setMinDate = () => {
-      if (startDate) {
-        let minDate = startDate
-        minDate.setDate(minDate.getDate() + 1)
-        return minDate
-      }
-    }
-
-    const setMaxDate = () => {
-      if (endDate) {
-        let maxDate = endDate
-        maxDate.setDate(maxDate.getDate() - 1)
-        return maxDate
-      }
-    }
+    registerLocale('es', es)
 
     return (
       <div className="h-[724px]">
@@ -44,18 +31,18 @@ const CreateNFTStep3 = React.forwardRef<HTMLElement, Props>(
               selected={startDate}
               onChange={(date: Date) => changeStartDate(date)}
               className='mr-[6px]'
-              maxDate={() => setMaxDate()}
               customInput={<CustomInput />}
               placeholderText="Select date'"
+              locale="es"
             />
             <DatePicker
               fixedHeight
               selected={endDate}
               onChange={(date: Date) => changeEndDate(date)}
               className='ml-[6px]'
-              minDate={() => setMinDate()}
               customInput={<CustomInput />}
               placeholderText="Select date"
+              locale="es"
             />
           </div>
         </div>

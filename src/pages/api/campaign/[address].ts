@@ -4,7 +4,7 @@ import db from "../../../../server/models";
 const logger = require('tracer').console();
 const { Op } = require("sequelize");
 import SolanaHelper from "@/pages/solana_helper";
-import {NFT_STATUS} from "@/pages/enums/generic_enum";
+import {DISCOUNT_TYPE, NFT_STATUS, NFT_TYPE} from "@/pages/enums/generic_enum";
 
 type Data = {
   address: any
@@ -56,7 +56,8 @@ const handler =
             model: db.nfts,
             as: "nfts",
           },
-        ]
+        ],
+        order: [['id', 'desc']],
       })
 
       let campaignList = []
@@ -100,7 +101,7 @@ const handler =
     })
     .post(async ( req: NextApiRequest, res: NextApiResponse<void>) => {
       const {address} = req.query
-      const { title, description, lat, lng, distance, display_started_at, display_ended_at, campaign_settings} = req.body
+      const { title, description, lat, lng, distance, display_started_at, display_ended_at, campaign_settings, nft_type} = req.body
 
       const transaction = await db.sequelize.transaction()
       const centerLocation = { type: 'Point', coordinates: [lng, lat]}
@@ -130,17 +131,7 @@ const handler =
         })
 
         // TODO 다이나믹 nft 날짜 조정
-        const campaignSettingsDto = campaign_settings.map(campaign_setting => {
-          return {
-            campaign_id: campaign.id,
-            nft_type: campaign_setting.nft_type,
-            discount_type: campaign_setting.discount_type,
-            discount_value:  campaign_setting.discount_value,
-            image_url: campaign_setting.image_url,
-            display_started_at: campaign_setting.display_started_at,
-            display_ended_at: campaign_setting.display_ended_at,
-          }
-        })
+        const campaignSettingsDto = getCampaignSettingsDto(nft_type, campaign_settings, campaign)
 
         // 캠페인 정보 업데이트
         await db.campaign_infos.bulkCreate(campaignSettingsDto)
@@ -222,5 +213,48 @@ const makePolygon = (lat: number, lng: number, distance: number) => {
   ];
   console.log({ type: 'Polygon', coordinates: [points]})
   return { type: 'Polygon', coordinates: [points]};
+}
+
+const getCampaignSettingsDto = (nftType: string, campaign_settings: any, campaign: any) => {
+  if (nftType === NFT_TYPE.STANDARD) {
+    return campaign_settings.map(campaign_setting => {
+      return {
+        campaign_id: campaign.id,
+        nft_type: campaign_setting.nft_type,
+        discount_type: campaign_setting.discount_type,
+        discount_value:  campaign_setting.discount_value,
+        image_url: campaign_setting.image_url,
+        display_started_at: campaign_setting.display_started_at,
+        display_ended_at: campaign_setting.display_ended_at,
+      }
+    })
+  } else {
+    let initialStartDate = new Date(campaign.display_started_at)
+    let initialEndDate = null
+    return campaign_settings.map(campaign_setting => {
+      let startDate = new Date()
+      let endDate = new Date()
+      if (!initialEndDate) {
+        startDate.setDate(initialStartDate.getDate())
+        initialEndDate = new Date()
+        initialEndDate.setDate(initialStartDate.getDate() + campaign_setting.days)
+        endDate = initialEndDate
+      } else {
+        startDate.setDate(initialEndDate.getDate())
+        endDate.setDate(initialEndDate.getDate() + campaign_setting.days)
+      }
+
+      return {
+        campaign_id: campaign.id,
+        nft_type: campaign_setting.nft_type,
+        discount_type: campaign_setting.discount_type,
+        discount_value:  campaign_setting.discount_type === DISCOUNT_TYPE.AMOUNT
+          ? campaign_setting.discount_amount: campaign_setting.discount_rate,
+        image_url: campaign_setting.image_url,
+        display_started_at: startDate,
+        display_ended_at: endDate,
+      }
+    })
+  }
 }
 

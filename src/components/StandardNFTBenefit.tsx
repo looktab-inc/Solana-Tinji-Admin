@@ -9,11 +9,11 @@ export const StandardNFTBenefit: FC = ({}) => {
   const [standardNFT, setStandardNFT] = useState({
     id: 0,
     nftType: 'standard',
-    discountType: 'amount',
-    discountAmount: 0,
-    discountRate: 0,
-    imageUrl: '',
-    imageName:' Upload NFT img',
+    discount_type: 'amount',
+    discount_amount: 0,
+    discount_rate: 0,
+    image_url: '',
+    image_name:' Upload NFT img',
     display_started_at: '',
     display_ended_at: '',
   })
@@ -22,7 +22,7 @@ export const StandardNFTBenefit: FC = ({}) => {
 
   useEffect(() => {
     const defaultStandardNFT = createNFTs.filter(createNFT => {
-      return createNFT.nftType === 'standard'
+      return createNFT.nft_type === 'standard'
     })
     setStandardNFT(defaultStandardNFT[0])
   })
@@ -47,13 +47,13 @@ export const StandardNFTBenefit: FC = ({}) => {
       }
     }).then( response => {
       const {image} = response.data
-      changeCreateNFT(standardNFT.id, 'imageUrl', `${image}`)
-      changeCreateNFT(standardNFT.id, 'imageName', file.name)
+      changeCreateNFT(standardNFT.id, 'image_url', `${image}`)
+      changeCreateNFT(standardNFT.id, 'image_name', file.name)
     })
   }
 
   const changeDiscountType = (discountType) => {
-    changeCreateNFT(standardNFT.id, 'discountType', discountType)
+    changeCreateNFT(standardNFT.id, 'discount_type', discountType)
   }
 
   const changeDiscountValue = (key, value) => {
@@ -68,7 +68,7 @@ export const StandardNFTBenefit: FC = ({}) => {
           <li className="flex justify-start items-center">
             <div className={'cursor-auto flex'} onClick={() => changeDiscountType('amount')}>
               <Image
-                src={`${standardNFT.discountType == 'amount' ? '/images/active.svg' : '/images/inactive.svg'}`}
+                src={`${standardNFT.discount_type == 'amount' ? '/images/active.svg' : '/images/inactive.svg'}`}
                 alt="active"
                 width={20}
                 height={20}
@@ -79,14 +79,14 @@ export const StandardNFTBenefit: FC = ({}) => {
               type="number"
               className="w-[339px] placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px] cursor-point"
               placeholder="Enter discount amount"
-              defaultValue={standardNFT.discountAmount}
-              onChange={(e) => changeDiscountValue("discountAmount", e.target.value)}
+              defaultValue={standardNFT.discount_amount}
+              onChange={(e) => changeDiscountValue("discount_amount", e.target.value)}
               min={0}
             />
           </li>
           <li className="flex justify-start items-center mt-[12px]">
             <CustomRadio
-              active={standardNFT.discountType == 'rate'}
+              active={standardNFT.discount_type == 'rate'}
               label={`Discount rate`}
               onClick={() => changeDiscountType('rate')}
             />
@@ -94,8 +94,8 @@ export const StandardNFTBenefit: FC = ({}) => {
               type="number"
               className="w-[339px] placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
               placeholder="Enter discount rate"
-              defaultValue={standardNFT.discountRate}
-              onChange={(e) => changeDiscountValue("discountRate", e.target.value)}
+              defaultValue={standardNFT.discount_rate}
+              onChange={(e) => changeDiscountValue("discount_rate", e.target.value)}
               min={0}
               max={100}
             />
@@ -106,7 +106,7 @@ export const StandardNFTBenefit: FC = ({}) => {
           <label htmlFor="uploadFile"
                  className="w-[440px]  placeholder:text-[#646B7C] rounded-xl border border-[#646B7C] bg-[#191A1E] py-[16px] px-[24px]"
           >
-            {standardNFT.imageName}
+            {standardNFT.image_name}
           </label>
           <button
             onClick={handleClickUploadImage}

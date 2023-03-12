@@ -1,6 +1,6 @@
 "use client";
 
-import {FC, useCallback, useContext, useEffect, useState} from 'react'
+import {FC, use, useCallback, useContext, useEffect, useState} from 'react'
 import AppProvider, {AppContext} from '@/context/AppContext';
 import {PageHeader} from "@/components/PageHeader";
 import { useRouter } from 'next/navigation';
@@ -10,15 +10,26 @@ import Cookies from 'js-cookie'
 import axios from 'axios';
 import {dateFormatWithDot} from "@/util/dateUtil";
 
+async function getCapaigns() {
+  const address = Cookies.get('address')
+  const response = await fetch(`/api/campaign/${address}`, {
+    method: "GET",
+    cache: 'no-store',
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    }
+  })
+  const campaigns =  await response.json()
+  return campaigns.list
+}
+
+const dataPromise = getCapaigns()
+
 export default function DashBoard() {
   const { account, disconnectWallet, connectWallet } = useContext(AppContext);
   const [activeCampaign, setActiveCampaign] = useState([]);
-  const [campaigns, setCampaigns] = useState([])
   const router = useRouter();
-
-  useEffect(() => {
-    getCampaigns()
-  }, [])
+  const campaigns = use(dataPromise)
 
   const handleActiveCampaign = (index: number) => {
     if (activeCampaign.includes(index)) {
@@ -27,20 +38,6 @@ export default function DashBoard() {
       setActiveCampaign([...activeCampaign, index]);
     }
   };
-
-  const getCampaigns = async () => {
-    const address = Cookies.get('address')
-    await axios.get(`/api/campaign/${address}`, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      }
-    }).then(response => {
-      const {list} = response.data
-      setCampaigns(list)
-    }).catch(e => {
-      setCampaigns([])
-    })
-  }
 
   const handleClickGoToCreateCampaign = () => {
     router.push('/create')
@@ -112,8 +109,8 @@ export default function DashBoard() {
                 </div>
               </div>
               <div className="flex flex-col">
-                {campaigns.map((campaign, index) =>
-                  <>
+                {campaigns && campaigns?.map((campaign, index) =>
+                  <div key={index}>
                     <div className={`
                       py-[36.5px] flex flex-row items-center justify-between 
                       ${campaigns.length -1  === index ||  activeCampaign.includes(index) ? '' : 'border-b border-[#373A43]'}
@@ -166,7 +163,7 @@ export default function DashBoard() {
                             </div>
                           </div>
                           {campaign.nft_info.map((user, index) => (
-                            <>
+                            <div key={index}>
                               <div className={`flex flex-row justify-between items-center  text-[16px] px-[12px] py-[22px]
                               ${campaign.nft_info.length -1  === index ? '' : 'border-b border-[#41444E]'}
                               `}>
@@ -192,12 +189,12 @@ export default function DashBoard() {
                                   <p className="px-[30px]">{dateFormatWithDot(new Date(user.time))}</p>
                                 </div>
                               </div>
-                            </>
+                            </div>
                           ))}
                         </div>
                         : <></>
                     }
-                  </>
+                  </div>
                 )}
               </div>
             </div>

@@ -7,8 +7,15 @@ import {getAMPMTime} from "@/util/dateUtil";
 import {useRouter} from "next/navigation";
 
 export async function getData() {
-  const res = await fetch('/api/store',{ cache: 'no-store'})
-  return await res.json()
+  const res = await fetch('http://localhost:3000/api/store',{ cache: 'no-store'})
+  console.log(res.json())
+  //return await res.json()
+  return {
+    name: 'test',
+    open_time: {},
+    location_address: 'test',
+    description: "test"
+  }
 }
 
 const dataPromise = getData()

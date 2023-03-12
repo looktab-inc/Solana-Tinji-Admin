@@ -62,7 +62,7 @@ export default function CreateNFT() {
     setCompleteStep({
       step1: title.length > 0 && description.length > 0,
       step2: !!(marker.latitude && marker.longitude && range > 0),
-      step3: !!(startDate && endDate && nftType)
+      step3: !!(startDate && endDate && nftType && checkImage())
     })
     console.log(completeStep)
   }
@@ -112,19 +112,22 @@ export default function CreateNFT() {
     return `${year}-${month >= 10 ? month : '0' + month}-${day >= 10 ? day : '0' + day}`
   }
 
+  const checkImage = () => {
+    let nftsByType = createNFTs.filter(createNFT => createNFT.nft_type === nftType)
+    return nftsByType.filter(nft => nft.image_url.length <= 0).length === 0
+  }
+
   const handleClickPayment = async () => {
     const address = Cookies.get('address')
     changeCompleteStatus()
     if (completeStep.step1 && completeStep.step2 && completeStep.step3) {
       let campaignSettings = []
       createNFTs.filter(createNFT => {
-        return createNFT.nftType === nftType
+        return createNFT.nft_type === nftType
       }).forEach(createNFT => {
-        if (createNFT.nftType === 'standard') {
-          createNFT.display_started_at = getDate(startDate)
-          createNFT.display_ended_at = getDate(endDate)
-        } else {
-
+        if (createNFT.nft_type === 'standard') {
+          createNFT.display_started_at = startDate.toISOString()
+          createNFT.display_ended_at = endDate.toISOString()
         }
         createNFT.dicount_value = createNFT.discountType === 'rate' ?
           createNFT.discountRate : createNFT.discountAmount
@@ -137,11 +140,12 @@ export default function CreateNFT() {
         lng: marker?.longitude,
         lat: marker?.latitude,
         distance: range,
-        display_started_at: getDate(startDate),
-        display_ended_at: getDate(endDate),
+        display_started_at: startDate.toISOString(),
+        display_ended_at: endDate.toISOString(),
+        nft_type : nftType,
         campaign_settings : campaignSettings,
       }
-
+      console.log(params)
       await axios.post(`/api/campaign/${address}`, params)
         .then(_ => {
         setStep(3)
@@ -197,6 +201,7 @@ export default function CreateNFT() {
 
   const changeEndDate = (date) => {
     setEndDate(date)
+    console.log(date)
     if (startDate) {
       let difference = date.getTime() - startDate.getTime();
       setEventDays(Math.ceil(difference / (1000 * 3600 * 24)))
