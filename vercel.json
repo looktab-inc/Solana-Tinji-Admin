@@ -1,0 +1,6 @@
+{
+  "crons": [{
+    "path": "/api/nft",
+    "schedule": "5 0 * * *"
+  }]
+}
