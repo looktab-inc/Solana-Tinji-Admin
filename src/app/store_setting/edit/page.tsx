@@ -9,7 +9,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import CustomSelect from "@/components/CustomSelect";
 
 async function getData() {
-  const res = await fetch('/api/store',{ cache: 'no-store'})
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/store`,{ cache: 'no-store'})
   return await res.json()
 }
 
@@ -69,7 +69,7 @@ export default function StoreSettingEdit() {
       lat: locationPoint.latitude,
       lng: locationPoint.longitude
     }
-    await axios.post('/api/store', params)
+    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/store`, params)
       .then(_ => {router.push(`/store_setting`)})
   }
 
@@ -129,7 +129,7 @@ export default function StoreSettingEdit() {
     const file = e.target.files[0]
     const formData = new FormData();
     formData.append('image', file)
-    await axios.post('/api/upload/image', formData, {
+    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/upload/image`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       }

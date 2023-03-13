@@ -45,7 +45,7 @@ export const StandardNFTBenefit: FC = ({}) => {
     formData.append('image', file)
     if (!loading) {
       setLoading(true)
-      await axios.post('/api/upload/image', formData, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/upload/image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         }

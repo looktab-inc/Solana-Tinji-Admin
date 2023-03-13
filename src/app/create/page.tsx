@@ -146,7 +146,7 @@ export default function CreateNFT() {
         nft_type : nftType,
         campaign_settings : campaignSettings,
       }
-      await axios.post(`/api/campaign/${address}`, params)
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/campaign/${address}`, params)
         .then(_ => {
           setStep(3)
           setLoading(false)

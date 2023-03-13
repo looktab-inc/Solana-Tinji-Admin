@@ -7,7 +7,7 @@ import {getAMPMTime} from "@/util/dateUtil";
 import {useRouter} from "next/navigation";
 
 async function getData() {
-  const res = await fetch('http://localhost:3000/api/store',{ cache: 'no-store'})
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/store`,{ cache: 'no-store'})
   return await res.json()
 }
 

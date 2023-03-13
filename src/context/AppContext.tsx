@@ -102,7 +102,7 @@ export const AppProvider = (props: AppProps) => {
   }
 
   const disconnectWallet = async () => {
-    await axios.put('/api/disconnect').then( async _ => {
+    await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/disconnect`).then( async _ => {
       await provider.disconnect()
       router.push('/')
     })
