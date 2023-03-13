@@ -9,26 +9,15 @@ import {Lnb} from "@/components/lnb";
 import Cookies from 'js-cookie'
 import axios from 'axios';
 import {dateFormatWithDot} from "@/util/dateUtil";
+import DashboardSkeleton from "@/components/DashboardSkeleton";
 
-async function getCapaigns() {
-  const address = Cookies.get('address')
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/campaign/${address}`, {
-    cache: 'no-store',
-    headers: {
-      'Content-Type': 'application/json',
-    }
-  })
-  const campaigns =  await response.json()
-  return campaigns.list
-}
-
-const dataPromise = getCapaigns()
 
 export default function DashBoard() {
   const { account, disconnectWallet, connectWallet } = useContext(AppContext);
   const [activeCampaign, setActiveCampaign] = useState([]);
+  const [campaigns, setCampaigns] = useState([])
+  const [loading, setLoading] = useState(false)
   const router = useRouter();
-  const campaigns = use(dataPromise)
 
   const handleActiveCampaign = (index: number) => {
     if (activeCampaign.includes(index)) {
@@ -36,7 +25,24 @@ export default function DashBoard() {
     } else {
       setActiveCampaign([...activeCampaign, index]);
     }
-  };
+  }
+
+  useEffect(() => {
+    getCampaigns()
+  }, [])
+
+  const getCampaigns = async () => {
+    const address = Cookies.get('address')
+    await axios.get(`/api/campaign/${address}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    }).then(response => {
+      const {list} = response.data
+      setCampaigns(list)
+      setLoading(true)
+    })
+  }
 
   const handleClickGoToCreateCampaign = () => {
     router.push('/create')
@@ -108,6 +114,18 @@ export default function DashBoard() {
                 </div>
               </div>
               <div className="flex flex-col">
+                {
+                  !loading &&
+                  <>
+                    <DashboardSkeleton isLast={false}/>
+                    <DashboardSkeleton isLast={false}/>
+                    <DashboardSkeleton isLast={true}/>
+                  </>
+                }
+                {
+                  loading && campaigns.length === 0 &&
+                  <div className={'py-[50px] text-center'}>No campaign</div>
+                }
                 {campaigns && campaigns?.map((campaign, index) =>
                   <div key={index}>
                     <div className={`

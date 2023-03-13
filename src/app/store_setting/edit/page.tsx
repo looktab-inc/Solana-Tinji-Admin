@@ -7,13 +7,8 @@ import axios from "axios";
 import {useRouter} from "next/navigation";
 import SearchIcon from "@mui/icons-material/Search";
 import CustomSelect from "@/components/CustomSelect";
+import Spinner from "@/components/spinner";
 
-async function getData() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/store`,{ cache: 'no-store'})
-  return await res.json()
-}
-
-const dataPromise = getData()
 
 export default function StoreSettingEdit() {
   const [storeName, setStoreName] = useState('')
@@ -28,14 +23,20 @@ export default function StoreSettingEdit() {
     longitude: 0,
     latitude: 0,
   })
+  const [loading, setLoading] = useState(false)
+  const [profileLoading, setProfileLoading] = useState(false)
   const router = useRouter()
-  const data = use(dataPromise)
-  console.log(data)
   const uploadFile = useRef(null)
 
   useEffect(() => {
-    setInitialState(data)
-  }, [data])
+    getProfile()
+  }, [])
+
+  const getProfile = async () => {
+    const res = await fetch(`/api/store`,{ cache: 'no-store'})
+    const result =  await res.json()
+    setInitialState(result)
+  }
 
   const setInitialState = (initialData) => {
     setStoreName((initialData && initialData.name) || '')
@@ -43,6 +44,8 @@ export default function StoreSettingEdit() {
     setEndTime((initialData && initialData.open_time &&  initialData.open_time.end) || '')
     setDescription((initialData && initialData.description) || '')
     setLocation((initialData && initialData.location_address) || '')
+    setImageName(getCoverImageName(initialData.cover_url))
+    setImage(initialData.cover_url)
     if (!!(initialData && initialData.location.lat && initialData.location.lng)) {
       setLocationPoint({
         longitude: initialData.location.lng,
@@ -57,20 +60,32 @@ export default function StoreSettingEdit() {
   }
 
   const handleClickSave = async () => {
-    const params = {
-      name: storeName,
-      description: description,
-      location_address: location,
-      cover_url: image || '',
-      open_time: {
-        start: startTime,
-        end: endTime
-      },
-      lat: locationPoint.latitude,
-      lng: locationPoint.longitude
+    if (!profileLoading) {
+      setProfileLoading(true)
+      const params = {
+        name: storeName,
+        description: description,
+        location_address: location,
+        cover_url: image || '',
+        open_time: {
+          start: startTime,
+          end: endTime
+        },
+        lat: locationPoint.latitude,
+        lng: locationPoint.longitude
+      }
+      await axios.post(`/api/store`, params)
+        .then(_ => {
+          router.push(`/store_setting`)
+          setProfileLoading(false)
+        })
     }
-    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/store`, params)
-      .then(_ => {router.push(`/store_setting`)})
+  }
+
+  const getCoverImageName = (cover_url) => {
+    const uri = cover_url.length > 0 ? cover_url?.split('/') : null
+    if (uri && uri.length > 0) return `${uri[uri.length - 1]}.png`
+    else return 'Upload Store img'
   }
 
   const handleClickClose = () => {
@@ -129,15 +144,20 @@ export default function StoreSettingEdit() {
     const file = e.target.files[0]
     const formData = new FormData();
     formData.append('image', file)
-    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/upload/image`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      }
-    }).then( response => {
-      const {image} = response.data
-      setImageName(file.name)
-      setImage(image)
-    })
+
+    if (!loading) {
+      setLoading(true)
+      await axios.post(`/api/upload/image`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        }
+      }).then( response => {
+        const {image} = response.data
+        setImageName(file.name)
+        setImage(image)
+        setLoading(false)
+      })
+    }
   }
 
   const handleClickAddress = (address) => {
@@ -221,7 +241,7 @@ export default function StoreSettingEdit() {
                   <button
                     onClick={handleClickUploadImage}
                     className="w-[120px] h-[56px] text-[20px] font-bold rounded-[12px] outline outline-[#646B7C] ml-[12px]">
-                    Upload
+                    {loading ? <Spinner/> : `Upload`}
                   </button>
                   <input
                     id="uploadFile"
@@ -248,7 +268,7 @@ export default function StoreSettingEdit() {
                 className="justify-center items-center w-[120px] h-[56px] text-[20px] font-bold bg-gradient-to-r from-[#BA70FF] via-[#2E80FF] to-[#45F3FF] rounded-[12px]"
                 onClick={handleClickSave}
               >
-                Save
+                {profileLoading ? <Spinner/> : `Save`}
               </button>
             </div>
           </div>

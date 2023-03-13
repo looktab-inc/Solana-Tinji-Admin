@@ -14,6 +14,11 @@ module.exports = (sequelize, DataTypes) => {
         as: "payments",
         foreignKey: "store_address",
         onDelete: "cascade",
+      })
+      this.hasMany(models.campaigns, {
+        as: "campaigns",
+        foreignKey: "store_address",
+        onDelete: "cascade",
       });
     }
   }

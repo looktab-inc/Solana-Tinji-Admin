@@ -148,9 +148,11 @@ const handler =
           await transaction.commit()
           res.status(200).json()
         }).catch(e => {
+          console.log(e)
           throw "MakeNFTError"
         })
       } catch (e) {
+        console.log(e)
         await transaction.rollback()
         logger.error(e.message)
         return res.status(500).end()
@@ -170,37 +172,50 @@ const createNFT = async (
   }
 ) => {
   const solanaHelper = new SolanaHelper()
-  return new Promise<boolean>(async (resolve, reject) => {
-    try {
-      const attributes = [
-        { trait_type: 'store_address', value: address },
-        { trait_type: 'store_location_lat', value: location.lat },
-        { trait_type: 'store_location_lng', value: location.lng },
-        { trait_type: 'status', value: 'none' },
-        { trait_type: 'started_at', value: campaignSetting.display_started_at },
-        { trait_type: 'ended_at', value: campaignSetting.display_ended_at },
-        { trait_type: 'discount_type', value: campaignSetting.discount_type },
-        { trait_type: 'discount_rate', value: campaignSetting.discount_type === 'rate'?  campaignSetting.discount_rate : 0},
-        { trait_type: 'discount_amount', value: campaignSetting.discount_type === 'amount'?  campaignSetting.discount_amount : 0},
-      ]
-      const uri = await solanaHelper.getOriginalUri(description, campaignSetting.image_url, attributes)
-      for (let i = 0; i < 2; i++) {
-        const nft = await solanaHelper.createNft(
-          `${title} ${i + 1}`,
-          description,
-          uri,
-        )
-        await db.nfts.create({
-          campaign_id: campaignId,
-          store_address: address,
-          nft_address: nft.address.toString(),
-        })
-      }
-      return resolve(true)
-    } catch (e) {
-      return reject(e)
-    }
-  });
+  const attributes = [
+    { trait_type: 'store_address', value: address },
+    { trait_type: 'store_location_lat', value: location.lat },
+    { trait_type: 'store_location_lng', value: location.lng },
+    { trait_type: 'status', value: 'none' },
+    { trait_type: 'started_at', value: campaignSetting.display_started_at },
+    { trait_type: 'ended_at', value: campaignSetting.display_ended_at },
+    { trait_type: 'discount_type', value: campaignSetting.discount_type },
+    { trait_type: 'discount_rate', value: campaignSetting.discount_type === 'rate'?  campaignSetting.discount_rate : 0},
+    { trait_type: 'discount_amount', value: campaignSetting.discount_type === 'amount'?  campaignSetting.discount_amount : 0},
+  ]
+  const uri = await solanaHelper.getOriginalUri(description, campaignSetting.image_url, attributes)
+  const functionArray = []
+  for (let i = 0; i < 5; i++) {
+    functionArray.push(processingCreateNFTAndSave(
+      solanaHelper,
+      `${title} ${i+1}`,
+      description,
+      uri,
+      campaignId,
+      address))
+  }
+  return Promise.all(functionArray).then(response => {
+    console.log(response)
+    return true
+  }).catch(e => {
+    console.log(e)
+    return false
+  })
+}
+
+const processingCreateNFTAndSave = async (solanaHelper, title, description, uri, campaignId, address) => {
+  const nft = await solanaHelper.createNft(
+    title,
+    description,
+    uri,
+  )
+  const response = await db.nfts.create({
+    campaign_id: campaignId,
+    store_address: address,
+    nft_address: nft.address.toString(),
+  })
+
+  return true
 }
 
 const makePolygon = (lat: number, lng: number, distance: number) => {

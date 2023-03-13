@@ -6,7 +6,7 @@ const config = {
   "database": process.env.DB_NAME,
   "host": process.env.DB_HOSTNAME,
   "port":process.env.DB_PORT,
-  "dialect": "mysql"
+  "dialect": require('mysql2')
 }
 
 module.exports = config

@@ -25,13 +25,35 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "campaign_id",
         onDelete: "cascade",
       });
+      this.belongsTo(models.stores, {
+        as: "stores",
+        foreignKey: "store_address",
+        targetKey: 'address',
+        onDelete: "cascade",
+      })
     }
   }
   Campaign.init({
     title: DataTypes.STRING,
     store_address: DataTypes.STRING,
     description: DataTypes.STRING,
-    location: DataTypes.GEOMETRY('POINT'),
+    location: {
+      type: DataTypes.GEOMETRY('POINT'),
+      get() {
+        const point =  this.getDataValue("location")
+        if (!point) {
+          return {
+            lng: 0,
+            lat : 0
+          }
+        }
+        const coordinates = point['coordinates']
+        return {
+          lng: coordinates[0],
+          lat : coordinates[1]
+        }
+      }
+    },
     boundary: DataTypes.GEOMETRY('POLYGON'),
     distance: DataTypes.DOUBLE,
     display_started_at: DataTypes.DATE,

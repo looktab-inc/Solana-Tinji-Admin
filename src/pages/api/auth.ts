@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import nextConnect from 'next-connect'
 import db from "../../../server/models";
+import process from "process";
 const logger = require('tracer').console();
 const { Op } = require("sequelize");
 
@@ -14,6 +15,7 @@ const handler =
       async ( req: NextApiRequest, res: NextApiResponse) => {
         // 디비에서 정보 가져오기
         try {
+          console.log(process.env.DB_USERNAME)
           const { market_address } = req.body
           const store = await db.stores.findOne({
             where: {

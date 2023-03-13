@@ -1,21 +1,26 @@
 "use client";
 
-import {use, useEffect} from "react"
+import {cache, use, useEffect, useState} from "react"
 import {Lnb} from "@/components/lnb";
 import {PageHeader} from "@/components/PageHeader";
 import {getAMPMTime} from "@/util/dateUtil";
 import {useRouter} from "next/navigation";
 
-async function getData() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/store`,{ cache: 'no-store'})
-  return await res.json()
-}
-
-const dataPromise = getData()
 
 export default function StoreSetting() {
   const router = useRouter()
-  let data = use(dataPromise)
+  const [loading, setLoading] = useState(false)
+  const [profile, setProfile] = useState({
+    name: '',
+    open_time : null,
+    location_address: '',
+    description: '',
+    cover_url: ''
+  })
+
+  useEffect(() => {
+    getProfile()
+  }, [])
 
   const handleClickEdit = () => {
     router.push('/store_setting/edit')
@@ -27,6 +32,19 @@ export default function StoreSetting() {
     }
   }
 
+  const getCoverImageName = (cover_url) => {
+    const uri = cover_url.length > 0 ? cover_url?.split('/') : null
+    if (uri && uri.length > 0) return `${uri[uri.length - 1]}.png`
+    else return ''
+  }
+
+  const getProfile = async () => {
+    const res = await fetch(`/api/store`,{ cache: 'no-store'})
+    const result =  await res.json()
+    setProfile(result)
+    setLoading(true)
+  }
+
   return (
     <>
       <div className="flex h-[100vh]">
@@ -36,19 +54,39 @@ export default function StoreSetting() {
           <div className={`w-[1000px] min-h-[884px] bg-[#23262C] p-[40px] rounded-[24px] m-[48px]`}>
             <div className="border-[#373A43] border-b pb-[20px] mb-[20px]">
               <p className="text-[16px] font-medium">Store Name</p>
-              <p className="text-[18px] font-semibold mt-[12px]">{data.name}</p>
+              {
+                loading ?  <p className="text-[18px] font-semibold mt-[12px] min-h-[22px]">{profile.name}</p> :
+                  <div className={"animate-pulse bg-gray-700 w-[200px] h-[22px] mt-[12px]"}></div>
+              }
             </div>
             <div className="border-[#373A43] border-b pb-[20px] mb-[20px]">
               <p className="text-[16px] font-medium">Operating hours</p>
-              <p className="text-[18px] font-semibold mt-[12px]">{getTime(data.open_time)}</p>
+              {
+                loading ?   <p className="text-[18px] font-semibold mt-[12px]  min-h-[22px]">{getTime(profile.open_time)}</p>  :
+                  <div className={"animate-pulse bg-gray-700 w-[150px] h-[22px] mt-[12px]"}></div>
+              }
             </div>
             <div className="border-[#373A43] border-b pb-[20px] mb-[20px]">
               <p className="text-[16px] font-medium">Location</p>
-              <p className="text-[18px] font-semibold mt-[12px]">{data.location_address}</p>
+              {
+                loading ?  <p className="text-[18px] font-semibold mt-[12px]  min-h-[22px]">{profile.location_address}</p> :
+                  <div className={"animate-pulse bg-gray-700 w-[400px] h-[22px] mt-[12px]"}></div>
+              }
+            </div>
+            <div className="border-[#373A43] border-b pb-[20px] mb-[20px]">
+              <p className="text-[16px] font-medium">Store img</p>
+              {
+                loading ?  <p className="text-[18px] font-semibold mt-[12px] min-h-[22px]">{getCoverImageName(profile.cover_url)}</p> :
+                  <div className={"animate-pulse bg-gray-700 w-[200px] h-[22px] mt-[12px]"}></div>
+              }
             </div>
             <div className="pb-[20px] mb-[20px]">
               <p className="text-[16px] font-medium">Store description</p>
-              <div className="text-[18px] font-semibold mt-[12px] min-h-[350px]">{data.description}</div>
+
+              {
+                loading ?  <div className="text-[18px] font-semibold mt-[12px] min-h-[350px]">{profile.description}</div> :
+                  <div className={"animate-pulse bg-gray-700 w-full h-[350px] mt-[12px]"}></div>
+              }
             </div>
             <div className="text-right">
               <button

@@ -2,6 +2,8 @@ import React, { createContext, useEffect, useState } from "react";
 import {useRouter} from "next/navigation";
 import axios from "axios";
 import Cookies from 'js-cookie'
+import {SystemProgram, Transaction, TransactionMessage, VersionedTransaction} from "@solana/web3.js";
+import SolanaHelper from "@/util/solana_helper";
 
 export const AppContext = createContext({} as any);
 
@@ -102,7 +104,7 @@ export const AppProvider = (props: AppProps) => {
   }
 
   const disconnectWallet = async () => {
-    await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/disconnect`).then( async _ => {
+    await axios.put(`/api/disconnect`).then( async _ => {
       await provider.disconnect()
       router.push('/')
     })
@@ -112,15 +114,28 @@ export const AppProvider = (props: AppProps) => {
     return (account && account.address) || false
   }
 
-  const transferWithPhantom = async () => {
-    return new Promise(async (resolve, reject) => {
-      if (!provider) {
-        await connectWallet()
-        return reject()
+  const transferThroughPhantom = async (payAmount) => {
+    if (!provider || !checkLogin()) {
+      await connectWallet()
+      return false
+    }
+    /*
+    const message = `To avoid digital dognappers, sign below to authenticate with CryptoCorgis`;
+    const encodedMessage = new TextEncoder().encode(message);
+    const signedMessage = await provider2.signMessage(encodedMessage, "utf8");*/
+
+/*    try {
+      const solanaHelper = new SolanaHelper()
+      const confirmationStatus = await solanaHelper.makeVersionedTransaction(provider, account.address, payAmount);
+      if (confirmationStatus) {
+        const hasReachedSufficientCommitment = confirmationStatus === 'confirmed' || confirmationStatus === 'finalized';
+        if (hasReachedSufficientCommitment) return true
+        else return false
       }
-
-
-    })
+    } catch (error) {
+      console.warn(error)
+      return false
+    }*/
   }
 
   useEffect(() => {
@@ -154,7 +169,8 @@ export const AppProvider = (props: AppProps) => {
         changeCreateNFT,
         resetCreateNFTs,
         createNFTs,
-        setDefaultNFTs
+        setDefaultNFTs,
+        transferThroughPhantom
     }}
     >
       {props.children}

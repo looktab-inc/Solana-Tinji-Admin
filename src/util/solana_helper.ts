@@ -1,4 +1,13 @@
-import {clusterApiUrl, Connection, Keypair, PublicKey} from "@solana/web3.js";
+import {
+  clusterApiUrl,
+  Connection,
+  Keypair,
+  PublicKey,
+  SystemProgram,
+  TransactionMessage,
+  VersionedTransaction,
+  LAMPORTS_PER_SOL
+} from "@solana/web3.js";
 import {
   Metaplex,
   keypairIdentity,
@@ -20,9 +29,9 @@ class SolanaHelper{
 
   constructor() {
     this.user = Keypair.fromSecretKey(
-      bs58.decode(`${process.env.SECRET_KEY}`),
+      bs58.decode(`${process.env.SECRET_KEY || process.env.NEXT_PUBLIC_SECRET_KEY}`),
     );
-    this.publickKey = new PublicKey(`${process.env.PUBLIC_KEY}`);
+    this.publickKey = new PublicKey(`${process.env.PUBLIC_KEY || process.env.NEXT_PUBLIC_PUBLIC_KEY}`);
     this.connection = new Connection(clusterApiUrl('devnet'));
     this.metaplex = Metaplex.make(this.connection)
       .use(keypairIdentity(this.user))
@@ -99,6 +108,40 @@ class SolanaHelper{
       })
     })
   }
+
+  async makeVersionedTransaction(provider: any, payerAddress: string, amount: number) {
+    const payerPublicKey = new PublicKey(payerAddress)
+    let blockhash = await this.connection.getLatestBlockhash().then((res) => res.blockhash);
+    const instructions = [
+      SystemProgram.transfer({
+        fromPubkey: payerPublicKey,
+        toPubkey: this.publickKey,
+        lamports: LAMPORTS_PER_SOL * amount,
+      }),
+    ];
+
+    const messageV0 = new TransactionMessage({
+      payerKey: payerPublicKey,
+      recentBlockhash: blockhash,
+      instructions,
+    }).compileToV0Message();
+
+    const transaction =  new VersionedTransaction(messageV0);
+    const { signature } = await provider.signAndSendTransaction(transaction);
+    const { value } = await this.connection.getSignatureStatus(signature);
+    return value?.confirmationStatus;
+  }
+
+  async getSignatureStatus (signature) {
+    try {
+      const { value } = await this.connection.getSignatureStatus(signature);
+      return value?.confirmationStatus;
+    } catch (error) {
+      console.warn(error);
+      throw new Error(error.message);
+    }
+  }
+
 }
 
 export default SolanaHelper

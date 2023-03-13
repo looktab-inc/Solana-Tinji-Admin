@@ -64,7 +64,7 @@ const handler =
         }
       })
       const uri = await solanaHelper.getOriginalUri(campaign.description, image, attributes)
-      await solanaHelper.updateNft(campaign.title, uri, address as string)
+      await solanaHelper.updateNft(campaign.title, uri, nftByWeb3)
         .then(async _ => {
           const response = await db.nfts.update(
             {

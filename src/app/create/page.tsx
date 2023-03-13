@@ -18,8 +18,7 @@ import {CountryCodes} from "@/util/IOSCounryCode";
 import Spinner from "@/components/spinner";
 
 export default function CreateNFT() {
-  const { setDefaultNFTs } = useContext(AppContext)
-  const { createNFTs, changeCreateNFT } = useContext(AppContext)
+  const { createNFTs, setDefaultNFTs, transferThroughPhantom} = useContext(AppContext)
   const router = useRouter()
   const mapRef = useRef(null)
   const [step, setStep] = useState(0)
@@ -122,7 +121,7 @@ export default function CreateNFT() {
   const handleClickPayment = async () => {
     const address = Cookies.get('address')
     changeCompleteStatus()
-    if (completeStep.step1 && completeStep.step2 && completeStep.step3 && !loading && checkImage()) {
+    if (completeStep.step1 && completeStep.step2 && !!(startDate && endDate && nftType) && !loading && checkImage()) {
       setLoading(true)
       let campaignSettings = []
       createNFTs.filter(createNFT => {
@@ -134,7 +133,6 @@ export default function CreateNFT() {
         }
         campaignSettings.push(createNFT)
       })
-
       const params = {
         title: title,
         description: description,
@@ -146,11 +144,11 @@ export default function CreateNFT() {
         nft_type : nftType,
         campaign_settings : campaignSettings,
       }
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/campaign/${address}`, params)
+      await axios.post(`/api/campaign/${address}`, params)
         .then(_ => {
           setStep(3)
           setLoading(false)
-      })
+        })
     }
   }
 

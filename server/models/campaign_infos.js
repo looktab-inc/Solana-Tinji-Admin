@@ -27,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
     image_url: DataTypes.STRING,
     display_started_at: DataTypes.DATE,
     display_ended_at: DataTypes.DATE,
+    completed_at: DataTypes.DATE,
   }, {
     sequelize,
     tableName: 'campaign_infos',

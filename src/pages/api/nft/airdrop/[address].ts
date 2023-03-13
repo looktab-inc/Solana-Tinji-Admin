@@ -6,7 +6,8 @@ import SolanaHelper from "@/util/solana_helper";
 import {NFT_STATUS} from "@/util/enums/generic_enum";
 
 type NFT = {
-  nft_address: string,
+  nft_address: string;
+  distance: any;
 }
 type NFTList = {
   list : Array<NFT>;
@@ -30,7 +31,16 @@ const handler =
         const whereQuery = db.sequelize.fn('ST_Within',
             db.sequelize.literal(`ST_GeomFromText('POINT(${lng} ${lat})')`),
             db.sequelize.literal('boundary'));
+        const selectDistanceQuery = db.sequelize.fn('ST_DISTANCE_SPHERE',
+          db.sequelize.literal('location'),
+          db.sequelize.literal(`ST_GeomFromText('POINT(${lng} ${lat})')`),)
+
         const campaigns = await db.campaigns.findAll({
+          attributes: [
+            'id', 'title', 'store_address', 'description', 'location', 'boundary',
+            'display_started_at', 'display_ended_at',
+            [selectDistanceQuery, 'distance_by_meter']
+          ],
           where: {
             $and: db.sequelize.where(whereQuery, 1),
             display_started_at: {
@@ -89,8 +99,10 @@ const transfer = async (campaigns: any, transferAddress: string) => {
                   },
                   {where: {id: mintNft.id}}
                 )
+                const distance = Number(campaign.get('distance_by_meter') / 1000)
                 transferNft.push({
-                  nft_address: mintAddress
+                  nft_address: mintAddress,
+                  distance: distance.toFixed(2),
                 })
               }
             })
@@ -105,6 +117,10 @@ const transfer = async (campaigns: any, transferAddress: string) => {
       return reject(e)
     }
   })
+}
+
+const processingTransferNFT = () => {
+
 }
 
 

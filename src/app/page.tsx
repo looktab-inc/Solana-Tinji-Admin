@@ -12,7 +12,7 @@ export default function Home() {
 
   const handleClickConnectWallet = async () => {
     await connectWallet().then( address => {
-      axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth`, {
+      axios.post(`/api/auth`, {
         market_address: address
       }).then(_ => {
         router.push('/dashboard')
