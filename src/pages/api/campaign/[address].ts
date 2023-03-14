@@ -1,10 +1,11 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
+import type {NextApiRequest, NextApiResponse} from 'next'
 import nextConnect from 'next-connect'
 import db from "../../../../server/models";
+import SolanaHelper from "@/util/solana_helper";
+import {NFT_STATUS, NFT_TYPE} from "@/util/enums/generic_enum";
+
 const logger = require('tracer').console();
 const { Op } = require("sequelize");
-import SolanaHelper from "@/util/solana_helper";
-import {DISCOUNT_TYPE, NFT_STATUS, NFT_TYPE} from "@/util/enums/generic_enum";
 
 type Data = {
   address: any
@@ -60,6 +61,7 @@ const handler =
         order: [['id', 'desc']],
       })
 
+      const displayNFTStatus = [NFT_STATUS.USED, NFT_STATUS.BURN, NFT_STATUS.EXPIRATION];
       let campaignList = []
       campaigns.forEach(campaign => {
         let dislikeCount = 0
@@ -68,13 +70,15 @@ const handler =
         let noneCount = 0
         let nftList = []
 
+        const notMintedItem = campaign.nfts.filter(nft => !nft.holder_address)
+
         campaign.nfts.forEach(nft => {
           if (nft.status === NFT_STATUS.NONE) noneCount+= 1
-          else if (nft.status === NFT_STATUS.LIKE) likeCount+=1
+          else if (displayNFTStatus.includes(nft.status)) likeCount+=1
           else if (nft.status === NFT_STATUS.DISLIKE) dislikeCount+=1
           else if (nft.status === NFT_STATUS.USED) usedCount+=1
 
-          if (nft.status) {
+          if (displayNFTStatus.includes(nft.status)) {
             nftList.push({
               id: nft.id,
               holder_address: nft.holder_address,
@@ -87,11 +91,12 @@ const handler =
         campaignList.push({
           id: campaign.id,
           title: campaign.title,
-          impress: `${dislikeCount + likeCount + usedCount + noneCount}/100`,
+          impress: `${likeCount}/100`,
           dislike_count: dislikeCount,
           like_count: likeCount,
           used_count: usedCount,
           none_count: noneCount,
+          not_minted_count: notMintedItem.length,
           nft_info: nftList
         })
       })

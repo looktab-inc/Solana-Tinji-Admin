@@ -13,4 +13,6 @@ export enum NFT_STATUS {
   LIKE = 'like',
   DISLIKE = 'dislike',
   USED = 'used',
+  BURN = 'burn',
+  EXPIRATION = 'expiration'
 }

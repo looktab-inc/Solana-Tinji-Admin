@@ -1,6 +1,6 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
+import type {NextApiRequest, NextApiResponse} from 'next'
 import nextConnect from 'next-connect'
-import db, { Sequelize } from "../../../../server/models";
+import db from "../../../../server/models";
 import {Op} from "sequelize";
 import SolanaHelper from "@/util/solana_helper";
 import {NFT_STATUS} from "@/util/enums/generic_enum";
@@ -21,13 +21,25 @@ const handler =
         })
       }
 
+      const NFTStatus = [
+        NFT_STATUS.NONE,
+        NFT_STATUS.LIKE,
+        NFT_STATUS.DISLIKE,
+        NFT_STATUS.USED,
+        NFT_STATUS.BURN,
+        NFT_STATUS.EXPIRATION
+      ];
+
+      if (!NFTStatus.includes(status)) {
+        return res.status(500).json({
+          message: '존재하지 않는 상태값 입니다.'
+        })
+      }
+
       const nft = await db.nfts.findOne({
         where: {
           nft_address: {
             [Op.eq]: address,
-          },
-          status: {
-            [Op.eq]: NFT_STATUS.NONE,
           },
           holder_address: {
             [Op.eq]: holder_address,
