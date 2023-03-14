@@ -96,6 +96,7 @@ const handler =
           like_count: likeCount,
           used_count: usedCount,
           none_count: noneCount,
+          nft_count: campaign.nfts.length,
           not_minted_count: notMintedItem.length,
           nft_info: nftList
         })
