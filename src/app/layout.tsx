@@ -15,7 +15,7 @@ export default function RootLayout({
       <Head>
         <link rel="favicon" href="./favicon.ico"/>
       </Head>
-      <body className="font-Montserrat h-[100vh] w-full">
+      <body className="font-Montserrat h-[100vh] w-full bg-[#000] text-[#fff]">
         <AppProvider>
           {children}
         </AppProvider>

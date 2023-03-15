@@ -83,6 +83,7 @@ export default function StoreSettingEdit() {
   }
 
   const getCoverImageName = (cover_url) => {
+    if (!cover_url) return  'Upload Store img'
     const uri = cover_url.length > 0 ? cover_url?.split('/') : null
     if (uri && uri.length > 0) return `${uri[uri.length - 1]}.png`
     else return 'Upload Store img'

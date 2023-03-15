@@ -33,6 +33,7 @@ export default function StoreSetting() {
   }
 
   const getCoverImageName = (cover_url) => {
+    if (!cover_url) return  ''
     const uri = cover_url.length > 0 ? cover_url?.split('/') : null
     if (uri && uri.length > 0) return `${uri[uri.length - 1]}.png`
     else return ''

@@ -148,6 +148,8 @@ export default function CreateNFT() {
         .then(_ => {
           setStep(3)
           setLoading(false)
+        }).catch(e => {
+          setLoading(false)
         })
     }
   }
