@@ -74,7 +74,7 @@ const handler =
 
         campaign.nfts.forEach(nft => {
           if (nft.status === NFT_STATUS.NONE) noneCount+= 1
-          else if (displayNFTStatus.includes(nft.status)) likeCount+=1
+          else if ([NFT_STATUS.EXPIRATION, NFT_STATUS.BURN, NFT_STATUS.LIKE].includes(nft.status)) likeCount+=1
           else if (nft.status === NFT_STATUS.DISLIKE) dislikeCount+=1
           else if (nft.status === NFT_STATUS.USED) usedCount+=1
 
@@ -91,13 +91,13 @@ const handler =
         campaignList.push({
           id: campaign.id,
           title: campaign.title,
-          impress: `${likeCount}/100`,
+          impress: `${likeCount + usedCount + noneCount}/100`,
           dislike_count: dislikeCount,
           like_count: likeCount,
           used_count: usedCount,
           none_count: noneCount,
           nft_count: campaign.nfts.length,
-          not_minted_count: notMintedItem.length,
+          not_minted_count: notMintedItem.length + 95,
           nft_info: nftList
         })
       })
