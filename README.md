@@ -13,7 +13,14 @@
 Local businesses can attract local customers by airdropping dNFTs. The ads can reach customers 100% by making them swipe the dNFTs to receive them. This way, local businesses can decrease marketing costs and increase their advertising performance. Additionally, users can earn coupon benefits and tokens by viewing the ads.
 
 
-Demo https://tinji-admin.vercel.app
+Demo: https://tinji-admin.vercel.app
+
+## Spec
+Nextjs13<br/>
+Express<br/>
+solana/web3.js<br/>
+tailwindcss
+
 
 ## Getting Started
 1. run the docker database:
